@@ -129,6 +129,8 @@ html,
 body {
   margin: 0;
   padding: 0;
+  width: 100%;
+  height: 100%;
   max-width: 100%;
   overflow-x: hidden;
   touch-action: manipulation;
@@ -155,8 +157,8 @@ body {
 .app-shell {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  height: 100dvh;
+  min-height: 100dvh;
+  height: 100%;
   width: 100%;
   max-width: 100%;
   overflow: hidden;
@@ -197,8 +199,8 @@ body {
 }
 
 .brand-logo {
-  width: 3.5rem;
-  height: 3.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
   flex-shrink: 0;
   border-radius: 20%;
   overflow: hidden;
@@ -213,7 +215,7 @@ body {
 
 .brand-title {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 700;
   line-height: 1.2;
   color: var(--text);
@@ -355,7 +357,7 @@ html[data-theme='dark'] #themeIconMoon {
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  padding-top: calc(3.5rem + env(safe-area-inset-top));
+  padding-top: calc(3rem + env(safe-area-inset-top));
   padding-right: 1rem;
   padding-bottom: calc(6rem + env(safe-area-inset-bottom));
   padding-left: 1rem;
@@ -403,20 +405,20 @@ html[data-theme='dark'] #themeIconMoon {
 .avatar-ai,
 .avatar-user,
 .avatar-image {
-    width: 2.1rem;
-    height: 2.1rem;
-    flex-shrink: 0;
-    border-radius: 20%;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 0.1rem;
-    background-image: url('/assets/avatar-kawaii.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-  }
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  border-radius: 20%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.1rem;
+  background-image: url('/assets/avatar-kawaii.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
 
 .avatar-ai img,
 .avatar-ai svg,
@@ -429,7 +431,7 @@ html[data-theme='dark'] #themeIconMoon {
 
 .bubble-text {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   line-height: 1.6;
   overflow-wrap: anywhere;
   word-break: break-word;
@@ -439,7 +441,7 @@ html[data-theme='dark'] #themeIconMoon {
   background: var(--bubble-ai-bg);
   color: var(--bubble-ai-text);
   border: 1px solid var(--bubble-ai-border);
-  border-radius: 1.1rem 1.1rem 1.1rem 0.35rem;
+  border-radius: 1rem 1rem 1rem 0.35rem;
   padding: 0.75rem 1rem;
   max-width: 85%;
   min-width: 0;
@@ -449,7 +451,7 @@ html[data-theme='dark'] #themeIconMoon {
 .bubble-user {
   background: linear-gradient(135deg, var(--bubble-user-from), var(--bubble-user-to));
   color: #ffffff;
-  border-radius: 1.1rem 1.1rem 0.35rem 1.1rem;
+  border-radius: 1rem 1rem 0.35rem 1rem;
   padding: 0.75rem 1rem;
   max-width: 85%;
   min-width: 0;
@@ -459,7 +461,7 @@ html[data-theme='dark'] #themeIconMoon {
 .bubble-image {
   background: var(--bubble-ai-bg);
   border: 1px solid var(--bubble-ai-border);
-  border-radius: 1.1rem 1.1rem 1.1rem 0.35rem;
+  border-radius: 1rem 1rem 1rem 0.35rem;
   padding: 0.75rem;
   max-width: 85%;
   min-width: 0;
@@ -523,10 +525,11 @@ html[data-theme='dark'] #themeIconMoon {
   flex: 0 0 auto;
   position: fixed;
   bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
   width: 100%;
   max-width: 1400px;
+  margin: 0 auto;
   padding: 0.75rem 1rem;
   padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
   background: linear-gradient(to top, var(--bg-gradient-via) 55%, transparent);
@@ -643,7 +646,7 @@ html[data-theme='dark'] #themeIconMoon {
 /* ===== Markdown Body ===== */
 
 .markdown-body {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   line-height: 1.65;
   color: var(--bubble-ai-text);
   overflow-wrap: anywhere;
@@ -668,7 +671,7 @@ html[data-theme='dark'] #themeIconMoon {
 .markdown-body h4 {
   font-weight: 700;
   color: var(--text);
-  margin: 1.1rem 0 0.5rem;
+  margin: 1rem 0 0.5rem;
   line-height: 1.3;
 }
 
@@ -828,7 +831,7 @@ html[data-theme='dark'] #themeIconMoon {
   border-radius: 8px;
 }
 
-/* ===== Breakpoints ===== */
+/* ===== Breakpoints (Mobile-first) ===== */
 
 @media (min-width: 640px) {
   .app-header-inner {
@@ -862,6 +865,57 @@ html[data-theme='dark'] #themeIconMoon {
 
   .brand-title {
     font-size: 1.15rem;
+  }
+
+  .brand-subtitle {
+    font-size: 0.75rem;
+  }
+
+  .input-hint {
+    font-size: 0.75rem;
+  }
+
+  .mode-btn {
+    font-size: 0.8rem;
+  }
+
+  .bubble-image-el {
+    max-height: 30rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .app-header-inner {
+    padding: 0.85rem 1.5rem;
+  }
+
+  .messages-area {
+    padding: calc(3rem + env(safe-area-inset-top)) 1.5rem calc(2rem + env(safe-area-inset-bottom)) 1.5rem;
+    gap: 1.25rem;
+  }
+
+  .bubble-ai,
+  .bubble-user,
+  .bubble-image {
+    max-width: 70%;
+    padding: 0.8rem 1.1rem;
+  }
+
+  .typing-row {
+    padding: 0 1.5rem;
+  }
+
+  .input-dock {
+    padding: 0.75rem 1rem;
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+  }
+
+  .input-dock-inner {
+    padding: 0.85rem;
+  }
+
+  .brand-title {
+    font-size: 1.05rem;
   }
 
   .brand-subtitle {
@@ -920,8 +974,40 @@ html[data-theme='dark'] #themeIconMoon {
     font-size: 1rem;
   }
 
-.bubble-text {
+  .bubble-text {
     font-size: 0.98rem;
+  }
+
+  .brand-title {
+    font-size: 1.15rem;
+  }
+
+  .brand-subtitle {
+    font-size: 0.75rem;
+  }
+
+  .input-hint {
+    font-size: 0.75rem;
+  }
+
+  .mode-btn {
+    font-size: 0.8rem;
+  }
+
+  .bubble-image-el {
+    max-height: 30rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .messages-area {
+    max-width: 900px;
+  }
+
+  .bubble-ai,
+  .bubble-user,
+  .bubble-image {
+    max-width: 720px;
   }
 }
 
@@ -948,35 +1034,28 @@ html[data-theme='dark'] #themeIconMoon {
   }
 }
 
-/* Mobile-specific adjustments for Android keyboard */
+/* Mobile-specific: hide text hint & subtitle on small screens */
 @media (max-width: 640px) {
-  .app-shell {
-    position: relative;
+  .brand-subtitle {
+    display: none;
   }
 
-  .messages-area {
-    padding: calc(3rem + env(safe-area-inset-top)) 0.75rem calc(2rem + env(safe-area-inset-bottom)) 0.75rem;
-    gap: 0.75rem;
+  .input-hint {
+    display: none;
   }
 
-  .bubble-ai,
-  .bubble-user,
-  .bubble-image {
-    max-width: 88%;
-    padding: 0.7rem 1rem;
+  .brand-title {
+    font-size: 1rem;
   }
 
-  .bubble-text {
-    font-size: 0.9rem;
+  .mode-btn {
+    min-height: 44px;
+    font-size: 0.8rem;
+    padding: 0 0.75rem;
   }
 
-  .input-dock {
-    padding: 0.6rem 0.75rem;
-    padding-bottom: calc(0.6rem + env(safe-area-inset-bottom));
-  }
-
-  .input-dock-inner {
-    padding: 0.6rem;
+  .mode-switch {
+    gap: 0.5rem;
   }
 
   .input-field {
@@ -989,25 +1068,15 @@ html[data-theme='dark'] #themeIconMoon {
     height: 44px;
   }
 
-  .brand-title {
-    font-size: 1rem;
-  }
-
-  .brand-subtitle {
-    display: none;
-  }
-
-  .mode-btn {
-    min-height: 34px;
-    font-size: 0.75rem;
-    padding: 0 0.6rem;
-  }
-
   .avatar-ai,
   .avatar-user,
   .avatar-image {
     width: 2rem;
     height: 2rem;
+  }
+
+  .btn-label {
+    display: none;
   }
 }
 
