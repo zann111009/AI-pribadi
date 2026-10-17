@@ -1,5 +1,5 @@
 function errorHandler(err, req, res, next) {
-  console.error('[Error]', err.message);
+  console.error('[Error]', err.message, 'code=', err.code, 'url=', err.config?.url || '-');
   if (err.response) {
     console.error('[ErrorDetail] status=', err.response.status, 'data=', JSON.stringify(err.response.data));
   }

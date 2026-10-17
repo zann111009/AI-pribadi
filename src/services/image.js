@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const HF_API_URL = 'https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-dev';
+const HF_API_URL = process.env.HF_API_URL || 'https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-dev';
 const HF_PLACEHOLDER_KEY = 'ganti-dengan-api-key-huggingface-anda';
 
 async function generateImage(prompt) {
@@ -34,6 +34,10 @@ async function generateImage(prompt) {
       const isLast = attempt === maxAttempts;
       const status = error.response?.status;
       const data = error.response?.data;
+
+      if (!status && error.code) {
+        console.error(`[Image] Network error code=${error.code} url=${HF_API_URL} message=${error.message}`);
+      }
 
       if (status === 503 && !isLast) {
         const estimatedTime = parseInt(data?.estimated_time || '20', 10);
