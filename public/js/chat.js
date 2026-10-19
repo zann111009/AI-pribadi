@@ -161,4 +161,35 @@ document.addEventListener('DOMContentLoaded', () => {
     modeChat.classList.remove('active');
     elements.messageInput.placeholder = 'Describe the image you want...';
   });
+
+  /* ===== Mobile Header Drawer ===== */
+  const menuToggle = document.getElementById('menuToggle');
+  const headerDrawer = document.getElementById('headerDrawer');
+  const headerOverlay = document.getElementById('headerOverlay');
+
+  if (menuToggle && headerDrawer && headerOverlay) {
+    function toggleMenu() {
+      const open = !menuToggle.classList.contains('open');
+      menuToggle.classList.toggle('open', open);
+      menuToggle.setAttribute('aria-expanded', String(open));
+      headerDrawer.classList.toggle('open', open);
+      headerOverlay.classList.toggle('open', open);
+      document.body.classList.toggle('body-menu-open', open);
+    }
+
+    menuToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleMenu();
+    });
+
+    headerOverlay.addEventListener('click', toggleMenu);
+
+    // Tutup drawer saat menukar mode chat/image
+    modeChat.addEventListener('click', () => {
+      if (menuToggle.classList.contains('open')) toggleMenu();
+    });
+    modeImage.addEventListener('click', () => {
+      if (menuToggle.classList.contains('open')) toggleMenu();
+    });
+  }
 });
