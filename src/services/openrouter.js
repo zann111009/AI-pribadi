@@ -48,7 +48,7 @@ async function sendMessage(messages, modelOverride) {
     contents,
     generationConfig: {
       temperature: 0.3,
-      maxOutputTokens: 1024,
+      maxOutputTokens: 4096,
     },
   };
 
@@ -62,10 +62,13 @@ async function sendMessage(messages, modelOverride) {
 
     const candidate = response.data?.candidates?.[0];
     const text = candidate?.content?.parts?.[0]?.text;
+    const finishReason = candidate?.finishReason;
 
     if (!text) {
       throw new Error('Respons dari Gemini kosong');
     }
+
+    console.log(`[Gemini] model=${model} finishReason=${finishReason || '-'}`);
 
     return { text, model };
   } catch (error) {
