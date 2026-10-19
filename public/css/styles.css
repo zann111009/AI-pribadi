@@ -374,7 +374,7 @@ body {
   .header-drawer {
     position: static;
     transform: none;
-    width: auto;
+    width: 100%;
     max-width: none;
     box-shadow: none;
     border: none;
@@ -382,6 +382,7 @@ body {
     flex-direction: row;
     align-items: center;
     gap: 0.75rem;
+    justify-content: space-between;
     border-bottom: none;
     margin-bottom: 0;
   }
