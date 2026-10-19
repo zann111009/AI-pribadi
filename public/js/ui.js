@@ -33,6 +33,70 @@ class ChatUI {
       a.setAttribute('target', '_blank');
       a.setAttribute('rel', 'noopener noreferrer');
     });
+    this.addCopyButtons(target);
+  }
+
+  addCopyButtons(root) {
+    root.querySelectorAll('pre code').forEach((code) => {
+      const pre = code.parentElement;
+      if (pre.querySelector('.copy-btn')) return;
+
+      const btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.title = 'Salin kode';
+      btn.innerHTML = '<svg class="copy-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>';
+      btn.style.cssText = `
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        z-index: 10;
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        border: none;
+        border-radius: 6px;
+        background: rgba(0,0,0,0.5);
+        color: #fff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        opacity: 0;
+        transition: opacity 0.2s ease, background-color 0.2s ease;
+      `;
+
+      pre.style.position = 'relative';
+      pre.addEventListener('mouseenter', () => { btn.style.opacity = '1'; });
+      pre.addEventListener('mouseleave', () => { btn.style.opacity = '0'; });
+
+      btn.addEventListener('click', () => this.copyCode(code));
+
+      pre.appendChild(btn);
+    });
+  }
+
+  async copyCode(code) {
+    const text = code.innerText;
+    try {
+      await navigator.clipboard.writeText(text);
+      this.showCopyToast(code);
+    } catch (err) {
+      console.error('[Copy]', err);
+    }
+  }
+
+  showCopyToast(code) {
+    const pre = code.parentElement;
+    const btn = pre.querySelector('.copy-btn');
+    const original = btn.innerHTML;
+    btn.innerHTML = '<svg class="copy-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    btn.style.backgroundColor = '#10b981';
+
+    setTimeout(() => {
+      btn.innerHTML = original;
+      btn.style.backgroundColor = '';
+    }, 1500);
   }
 
   scrollToBottom() {
