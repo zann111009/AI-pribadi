@@ -1010,6 +1010,10 @@ html[data-theme='dark'] #themeIconMoon {
     padding: 0.85rem 1.5rem;
   }
 
+  .header-actions {
+    margin-left: auto;
+  }
+
   .messages-area {
     padding: calc(3rem + env(safe-area-inset-top)) 1rem calc(2rem + env(safe-area-inset-bottom)) 1rem;
     gap: 1.15rem;
