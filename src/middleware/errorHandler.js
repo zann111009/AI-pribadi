@@ -25,17 +25,19 @@ function errorHandler(err, req, res, next) {
   const code = err.code || 'INTERNAL_ERROR';
 
   const msg = err.message || '';
-  if (msg.includes('HF_API_KEY') || msg.includes('belum diisi') || msg.includes('Hugging Face')) {
-    return res.status(400).json({ error: friendly.HF_KEY_MISSING, code: 'HF_KEY_MISSING' });
-  }
 
-  // Semua provider generate image gagal: tampilkan rincian tiap provider
+  // Semua provider generate image gagal: tampilkan rincian tiap provider.
+  // Harus dicek lebih dulu: pesan agregat mengandung nama "Hugging Face".
   if (err.code === 'IMAGE_PROVIDERS_FAILED' && Array.isArray(err.failures)) {
     return res.status(503).json({
       error: 'Gagal membuat gambar. ' + err.failures.join(' | '),
       code: 'IMAGE_PROVIDERS_FAILED',
       failures: err.failures,
     });
+  }
+
+  if (msg.includes('HF_API_KEY') || msg.includes('belum diisi') || msg.includes('Hugging Face')) {
+    return res.status(400).json({ error: friendly.HF_KEY_MISSING, code: 'HF_KEY_MISSING' });
   }
 
   // Handle DNS/connection errors from axios (err.code can be ENOTFOUND, ENETUNREACH, etc.)
