@@ -12,7 +12,9 @@ const POLLINATIONS_MODELS = (process.env.POLLINATIONS_MODELS || 'sana,flux')
   .filter(Boolean);
 const POLLINATIONS_WIDTH = parseInt(process.env.POLLINATIONS_WIDTH || '1024', 10);
 const POLLINATIONS_HEIGHT = parseInt(process.env.POLLINATIONS_HEIGHT || '1024', 10);
-const POLLINATIONS_MAX_WAIT = parseInt(process.env.POLLINATIONS_MAX_WAIT || '25000', 10);
+const POLLINATIONS_MAX_WAIT = parseInt(process.env.POLLINATIONS_MAX_WAIT || '10000', 10);
+const POLLINATIONS_RETRY_WAIT = parseInt(process.env.POLLINATIONS_RETRY_WAIT || '4000', 10);
+const POLLINATIONS_TIMEOUT = parseInt(process.env.POLLINATIONS_TIMEOUT || '45000', 10);
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 const GEMINI_IMAGE_MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-3.1-flash-image';
@@ -102,7 +104,7 @@ async function generateWithPollinations(prompt) {
 
     try {
       const response = await axios.get(url, {
-        timeout: 180000,
+        timeout: POLLINATIONS_TIMEOUT,
         responseType: 'arraybuffer',
         headers: { Accept: 'image/*' },
       });
@@ -119,22 +121,22 @@ async function generateWithPollinations(prompt) {
       const reason = describeError(error);
       attempts.push(`${model}: ${reason}`);
 
-      // Free tier: 1 gambar per 45 detik per IP. Tunggu sedikit lalu coba lagi.
+      // Free tier: 1 gambar per 45 detik per IP. Tunggu sebentar lalu coba satu model lagi.
       const isFreeLimit = error.response?.status === 402;
       const isLoading = error.response?.status === 503;
-      if ((isFreeLimit || isLoading) && Date.now() < deadline) {
-        const wait = Math.min(5000, Math.max(0, deadline - Date.now()));
-        if (wait > 0) {
-          console.warn(`[Image:Pollinations] ${reason}, menunggu ${wait}ms lalu mencoba lagi`);
-          await sleep(wait);
-          continue;
-        }
+      const remaining = deadline - Date.now();
+      if ((isFreeLimit || isLoading) && remaining > 0) {
+        const wait = Math.min(POLLINATIONS_RETRY_WAIT, remaining);
+        console.warn(`[Image:Pollinations] ${reason}, menunggu ${wait}ms lalu mencoba lagi`);
+        await sleep(wait);
+        continue;
       }
     }
   }
 
   const err = new Error(`Pollinations gagal: ${attempts.join(' | ')}`);
   err.code = 'POLLINATIONS_FAILED';
+  err.rateLimited = attempts.some((a) => a.includes('402'));
   throw err;
 }
 
@@ -202,10 +204,13 @@ async function generateImage(prompt) {
   }
 
   const summary = failures.join(' | ');
+  const rateLimited = failures.some((f) => f.includes('402') || f.includes('kredit tidak cukup'));
   const err = new Error(
-    `Semua provider generate image gagal: ${summary}. ` +
-    'Tambahkan kredit di huggingface.co/settings/billing untuk generate tanpa batas, ' +
-    'atau tunggu 45 detik sebelum mencoba lagi.'
+    'Semua provider generate image gagal: ' + summary + '. ' +
+    (rateLimited
+      ? 'Provider gratis membatasi 1 gambar per 45 detik. Tunggu sebentar lalu coba lagi, ' +
+        'atau tambahkan kredit di huggingface.co/settings/billing untuk generate tanpa batas.'
+      : 'Tambahkan kredit di huggingface.co/settings/billing untuk generate tanpa batas.')
   );
   err.code = 'IMAGE_PROVIDERS_FAILED';
   err.failures = failures;
