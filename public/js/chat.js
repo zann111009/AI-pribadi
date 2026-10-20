@@ -208,7 +208,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
-      ui.showImage(url, prompt);
+      ui.trackObjectUrl(url);
+      ui.showImage(url, prompt, blob.type || 'image/jpeg');
 
     } catch (err) {
       ui.hideTypingIndicator();

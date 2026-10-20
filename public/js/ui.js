@@ -1,12 +1,28 @@
 class ChatUI {
   constructor(elements) {
     this.els = elements;
+    this.objectUrls = [];
     if (typeof marked !== 'undefined') {
       marked.setOptions({
         gfm: true,
         breaks: true,
       });
     }
+  }
+
+  trackObjectUrl(url) {
+    if (url) this.objectUrls.push(url);
+  }
+
+  revokeObjectUrls() {
+    this.objectUrls.forEach((url) => {
+      try {
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        // ignore
+      }
+    });
+    this.objectUrls = [];
   }
 
   wrapTables(root) {
@@ -193,6 +209,7 @@ class ChatUI {
     this.els.messagesArea.innerHTML = '';
     this.hideWelcome();
     this.els.clearSessionBtn.classList.add('hidden');
+    this.revokeObjectUrls();
     this.appendWelcome();
   }
 
@@ -223,7 +240,7 @@ class ChatUI {
     return div.innerHTML;
   }
 
-  showImage(url, prompt) {
+  showImage(url, prompt, mimeType = 'image/jpeg') {
     const div = document.createElement('div');
     div.className = 'message-enter message-row';
     div.innerHTML = `
@@ -233,11 +250,71 @@ class ChatUI {
         </svg>
       </div>
       <div class="bubble-image">
-        <img src="${url}" alt="Generated Image" class="bubble-image-el">
+        <div class="bubble-image-frame">
+          <img src="${url}" alt="Generated Image" class="bubble-image-el">
+          <button class="download-btn" type="button" title="Unduh gambar" aria-label="Unduh gambar">
+            <svg class="download-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3v12" />
+              <path d="m7 10 5 5 5-5" />
+              <path d="M5 21h14" />
+            </svg>
+          </button>
+        </div>
         <p class="bubble-image-caption">${this.escapeHTML(prompt)}</p>
       </div>
     `;
+
+    const img = div.querySelector('.bubble-image-el');
+    const btn = div.querySelector('.download-btn');
+
+    if (btn) {
+      btn.addEventListener('click', () => {
+        this.downloadImage(img, prompt, mimeType, btn);
+      });
+    }
+
     this.els.messagesArea.appendChild(div);
     this.scrollToBottom();
+  }
+
+  downloadImage(img, prompt, mimeType, btn) {
+    if (!img || !img.src) return;
+
+    const link = document.createElement('a');
+    link.href = img.src;
+    link.download = this.buildImageFilename(prompt, mimeType);
+    link.rel = 'noopener';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    this.showDownloadToast(btn);
+  }
+
+  buildImageFilename(prompt, mimeType) {
+    let slug = (prompt || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
+    if (slug.length > 40) slug = slug.slice(0, 40).replace(/-+$/, '');
+    if (!slug) slug = 'gambar';
+
+    const ext = mimeType.includes('png') ? 'png' : mimeType.includes('webp') ? 'webp' : 'jpg';
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+
+    return `zann-ai-${slug}-${stamp}.${ext}`;
+  }
+
+  showDownloadToast(btn) {
+    if (!btn) return;
+    const original = btn.innerHTML;
+    btn.innerHTML = '<svg class="download-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    btn.classList.add('done');
+
+    setTimeout(() => {
+      btn.innerHTML = original;
+      btn.classList.remove('done');
+    }, 1500);
   }
 }
