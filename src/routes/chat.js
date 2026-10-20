@@ -80,10 +80,10 @@ router.post('/generate-image', async (req, res, next) => {
       });
     }
 
-    const imageBuffer = await generateImage(prompt.trim());
+    const image = await generateImage(prompt.trim());
 
-    res.set('Content-Type', 'image/png');
-    res.send(imageBuffer);
+    res.set('Content-Type', image.mimeType || 'image/png');
+    res.send(image.buffer);
   } catch (error) {
     next(error);
   }

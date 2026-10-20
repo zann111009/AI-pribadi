@@ -29,6 +29,15 @@ function errorHandler(err, req, res, next) {
     return res.status(400).json({ error: friendly.HF_KEY_MISSING, code: 'HF_KEY_MISSING' });
   }
 
+  // Semua provider generate image gagal: tampilkan rincian tiap provider
+  if (err.code === 'IMAGE_PROVIDERS_FAILED' && Array.isArray(err.failures)) {
+    return res.status(503).json({
+      error: 'Gagal membuat gambar. ' + err.failures.join(' | '),
+      code: 'IMAGE_PROVIDERS_FAILED',
+      failures: err.failures,
+    });
+  }
+
   // Handle DNS/connection errors from axios (err.code can be ENOTFOUND, ENETUNREACH, etc.)
   const dnsCodes = ['ENOTFOUND', 'ENETUNREACH', 'ECONNREFUSED', 'ETIMEDOUT', 'ECONNRESET', 'EAI_AGAIN'];
   if (dnsCodes.includes(code)) {
