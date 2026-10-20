@@ -4,6 +4,7 @@ const axios = require('axios');
 const SessionStore = require('../stores/session');
 const { sendMessage, listModels, GEMINI_API_URL } = require('../services/openrouter');
 const { generateImage } = require('../services/image');
+const { storeImage, deleteImage } = require('../services/storage');
 
 const session = new SessionStore();
 
@@ -81,11 +82,28 @@ router.post('/generate-image', async (req, res, next) => {
     }
 
     const image = await generateImage(prompt.trim());
+    const stored = await storeImage(image.buffer, image.mimeType, prompt.trim());
 
-    res.set('Content-Type', image.mimeType || 'image/png');
-    res.send(image.buffer);
+    res.json({
+      url: stored.url,
+      mimeType: stored.mimeType,
+      provider: image.provider,
+      storage: stored.storage,
+      timestamp: new Date().toISOString(),
+    });
   } catch (error) {
     next(error);
+  }
+});
+
+router.delete('/image', async (req, res) => {
+  try {
+    const { url } = req.body || {};
+    const deleted = await deleteImage(url);
+    res.json({ deleted });
+  } catch (error) {
+    console.error('[DeleteImage]', error.message);
+    res.status(500).json({ error: 'Gagal menghapus gambar' });
   }
 });
 

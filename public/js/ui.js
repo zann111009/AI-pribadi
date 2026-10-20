@@ -269,7 +269,7 @@ class ChatUI {
 
     if (btn) {
       btn.addEventListener('click', () => {
-        this.downloadImage(img, prompt, mimeType, btn);
+        this.downloadImage(url, prompt, mimeType, btn);
       });
     }
 
@@ -277,16 +277,46 @@ class ChatUI {
     this.scrollToBottom();
   }
 
-  downloadImage(img, prompt, mimeType, btn) {
-    if (!img || !img.src) return;
+  async downloadImage(url, prompt, mimeType, btn) {
+    if (!url) return;
+
+    let href = url;
+    let revokeAfter = false;
+
+    // Atribut "download" diabaikan browser untuk URL lintas domain,
+    // jadi ambil dulu sebagai blob lalu pakai object URL lokal.
+    const isRemote = url.startsWith('http') && !url.startsWith(window.location.origin);
+    if (isRemote) {
+      try {
+        const response = await fetch(url, { mode: 'cors' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const blob = await response.blob();
+        href = URL.createObjectURL(blob);
+        revokeAfter = true;
+      } catch (err) {
+        console.error('[Download] Gagal mengambil gambar, membuka di tab baru:', err);
+        window.open(url, '_blank', 'noopener');
+        return;
+      }
+    }
 
     const link = document.createElement('a');
-    link.href = img.src;
+    link.href = href;
     link.download = this.buildImageFilename(prompt, mimeType);
     link.rel = 'noopener';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+
+    if (revokeAfter) {
+      setTimeout(() => {
+        try {
+          URL.revokeObjectURL(href);
+        } catch (e) {
+          // ignore
+        }
+      }, 10000);
+    }
 
     this.showDownloadToast(btn);
   }

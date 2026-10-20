@@ -90,7 +90,15 @@ class HistoryManager {
 
   addSession(messages, title) {
     const now = Date.now();
-    const snapshot = messages.map((m) => ({ role: m.role, content: m.content }));
+    const snapshot = messages.map((m) => {
+      const copy = { role: m.role, content: m.content };
+      if (m.role === 'image') {
+        copy.url = m.url;
+        copy.mimeType = m.mimeType;
+        copy.prompt = m.prompt;
+      }
+      return copy;
+    });
 
     if (this.currentSessionId) {
       const idx = this.history.findIndex((s) => s.id === this.currentSessionId);
@@ -141,6 +149,8 @@ class HistoryManager {
         this.ui.appendUserMessage(msg.content);
       } else if (msg.role === 'assistant') {
         this.ui.appendAssistantMessage(msg.content);
+      } else if (msg.role === 'image') {
+        this.ui.showImage(msg.url, msg.prompt || '', msg.mimeType || 'image/jpeg');
       }
     });
 
@@ -151,7 +161,9 @@ class HistoryManager {
   }
 
   deleteSession(id) {
+    const removed = this.history.find((s) => s.id === id);
     this.history = this.history.filter((s) => s.id !== id);
+    if (removed) this.cleanupImages(removed.messages);
     if (this.currentSessionId === id) {
       this.currentSessionId = null;
       this.ui.clearSession();
@@ -163,6 +175,23 @@ class HistoryManager {
 
   resetCurrent() {
     this.currentSessionId = null;
+  }
+
+  // Hapus gambar yang tersimpan di server saat entri riwayat dihapus.
+  // Kegagalan tidak boleh mengganggu penghapusan riwayat.
+  cleanupImages(messages) {
+    if (!Array.isArray(messages)) return;
+    const urls = messages
+      .filter((m) => m && m.role === 'image' && typeof m.url === 'string' && m.url.startsWith('http'))
+      .map((m) => m.url);
+
+    urls.forEach((url) => {
+      fetch('/api/image', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      }).catch((err) => console.error('[History] Gagal hapus gambar di server:', err));
+    });
   }
 
   openPanel() {

@@ -19,7 +19,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const historyManager = new HistoryManager(ui);
   historyManager.onSessionLoad = (messages) => {
-    currentMessages = (messages || []).map((m) => ({ role: m.role, content: m.content }));
+    currentMessages = (messages || []).map((m) => {
+      const copy = { role: m.role, content: m.content };
+      if (m.role === 'image') {
+        copy.url = m.url;
+        copy.mimeType = m.mimeType;
+        copy.prompt = m.prompt;
+      }
+      return copy;
+    });
   };
 
   /* ===== Mobile Header Drawer ===== */
@@ -200,17 +208,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
       ui.hideTypingIndicator();
 
+      const data = await response.json().catch(() => ({}));
+
       if (!response.ok) {
-        const data = await response.json();
         ui.showError(data.error || 'Gagal membuat gambar');
         return;
       }
 
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      ui.trackObjectUrl(url);
-      ui.showImage(url, prompt, blob.type || 'image/jpeg');
+      const url = data.url;
+      if (!url) {
+        ui.showError('Server tidak mengembalikan gambar');
+        return;
+      }
 
+      ui.showImage(url, prompt, data.mimeType || 'image/jpeg');
+
+      // Simpan ke riwayat supaya gambar tetap ada setelah reload
+      currentMessages.push({ role: 'user', content: prompt });
+      currentMessages.push({
+        role: 'image',
+        url,
+        mimeType: data.mimeType || 'image/jpeg',
+        prompt,
+      });
+      historyManager.addSession(currentMessages, prompt);
     } catch (err) {
       ui.hideTypingIndicator();
       ui.showError('Koneksi gagal');

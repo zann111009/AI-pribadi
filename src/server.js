@@ -2,6 +2,10 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+
+// .env.local dipakai untuk secret khusus pengembangan (mis. token Vercel Blob).
+// Di production Vercel menyuntik env var langsung, jadi file ini tidak ada di sana.
+require('dotenv').config({ path: path.join(__dirname, '..', '.env.local'), override: true });
 const chatRoute = require('./routes/chat');
 const errorHandler = require('./middleware/errorHandler');
 

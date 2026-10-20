@@ -8,9 +8,10 @@
     "dev": "node --watch src/server.js"
   },
   "dependencies": {
-    "express": "^4.21.1",
+    "@vercel/blob": "^2.8.2",
+    "axios": "^1.7.9",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "axios": "^1.7.9"
+    "express": "^4.21.1"
   }
 }
