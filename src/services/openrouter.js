@@ -12,6 +12,26 @@ const SYSTEM_PROMPT = [
   'Jangan menulis semuanya dalam satu paragraf panjang.',
 ].join(' ');
 
+const USER_NAME_MAX = 32;
+
+function sanitizeUserName(userName) {
+  if (typeof userName !== 'string') return '';
+  return userName.replace(/[\r\n]+/g, ' ').trim().slice(0, USER_NAME_MAX);
+}
+
+function buildSystemPrompt(userName) {
+  const name = sanitizeUserName(userName);
+  if (!name) return SYSTEM_PROMPT;
+
+  return [
+    SYSTEM_PROMPT,
+    `Nama pengguna yang sedang kamu bicarai adalah "${name}".`,
+    'Sapa dan panggil pengguna dengan nama tersebut secara natural, misalnya "Hai ' + name + ', ...".',
+    'Gunakan nama itu juga ketika jawaban bersifat personal atau menyapa pengguna.',
+    'Jika nama pengguna tidak relevan dengan pertanyaan, tidak perlu Disebutkan.',
+  ].join(' ');
+}
+
 function toGeminiMessages(messages) {
   const contents = [];
   for (const m of messages) {
@@ -31,7 +51,7 @@ async function listModels(apiKey) {
   return response.data.models || [];
 }
 
-async function sendMessage(messages, modelOverride) {
+async function sendMessage(messages, modelOverride, options = {}) {
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
@@ -43,7 +63,7 @@ async function sendMessage(messages, modelOverride) {
 
   const body = {
     system_instruction: {
-      parts: [{ text: SYSTEM_PROMPT }],
+      parts: [{ text: buildSystemPrompt(options.userName) }],
     },
     contents,
     generationConfig: {
@@ -88,7 +108,7 @@ async function sendMessage(messages, modelOverride) {
       if (fallback) {
         const fallbackName = fallback.name.replace('models/', '');
         console.warn(`[Fallback] Mencoba ${fallbackName}...`);
-        return sendMessage(messages, fallbackName);
+        return sendMessage(messages, fallbackName, options);
       } else {
         console.error('[Fallback] Tidak ada model alternatif yang cocok.');
       }
@@ -102,4 +122,12 @@ async function sendMessage(messages, modelOverride) {
   }
 }
 
-module.exports = { sendMessage, listModels, DEFAULT_MODEL, GEMINI_API_URL };
+module.exports = {
+  sendMessage,
+  listModels,
+  DEFAULT_MODEL,
+  GEMINI_API_URL,
+  SYSTEM_PROMPT,
+  buildSystemPrompt,
+  sanitizeUserName,
+};

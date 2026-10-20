@@ -98,6 +98,10 @@ document.addEventListener('DOMContentLoaded', () => {
     closeDrawer();
   }
 
+  function getUserName() {
+    return window.profileManager ? window.profileManager.getUserName() : '';
+  }
+
   async function handleSend() {
     const text = elements.messageInput.value.trim();
     if (!text) return;
@@ -121,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const response = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: text }),
+          body: JSON.stringify({ message: text, userName: getUserName() }),
         });
 
         const data = await response.json();

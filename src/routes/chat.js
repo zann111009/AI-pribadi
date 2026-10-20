@@ -9,7 +9,7 @@ const session = new SessionStore();
 
 router.post('/chat', async (req, res, next) => {
   try {
-    const { message } = req.body;
+    const { message, userName } = req.body;
 
     if (!message || typeof message !== 'string' || message.trim() === '') {
       return res.status(400).json({
@@ -22,7 +22,7 @@ router.post('/chat', async (req, res, next) => {
 
     const fullHistory = session.getAll();
 
-    const result = await sendMessage(fullHistory);
+    const result = await sendMessage(fullHistory, undefined, { userName });
     const aiResponse = result.text;
 
     session.add('assistant', aiResponse);

@@ -107,6 +107,10 @@ class ChatUI {
   }
 
   appendUserMessage(text) {
+    const profile = window.profileManager;
+    const username = profile ? profile.getUserName() : '';
+    const photo = profile ? profile.getPhoto() : '';
+
     const div = document.createElement('div');
     div.className = 'message-enter message-row message-row-user';
     div.innerHTML = `
@@ -116,9 +120,19 @@ class ChatUI {
         </svg>
       </div>
       <div class="bubble-user">
+        ${username ? `<span class="bubble-username">${this.escapeHTML(username)}</span>` : ''}
         <p class="bubble-text">${this.escapeHTML(text)}</p>
       </div>
     `;
+
+    if (photo) {
+      const avatar = div.querySelector('.avatar-user');
+      if (avatar) {
+        avatar.style.backgroundImage = `url("${photo}")`;
+        avatar.classList.add('has-photo');
+      }
+    }
+
     this.els.messagesArea.appendChild(div);
     this.scrollToBottom();
   }
