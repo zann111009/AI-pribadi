@@ -363,6 +363,11 @@ body {
   height: 1.15rem;
 }
 
+.header-drawer .btn-icon .new-chat-icon {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
 .body-menu-open {
   overflow: hidden;
 }
@@ -453,6 +458,11 @@ body {
 }
 
 .btn-icon .history-icon {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.btn-icon .new-chat-icon {
   width: 1.15rem;
   height: 1.15rem;
 }

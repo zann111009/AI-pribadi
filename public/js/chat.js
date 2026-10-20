@@ -22,6 +22,47 @@ document.addEventListener('DOMContentLoaded', () => {
     currentMessages = (messages || []).map((m) => ({ role: m.role, content: m.content }));
   };
 
+  /* ===== Mobile Header Drawer ===== */
+  const menuToggle = document.getElementById('menuToggle');
+  const headerDrawer = document.getElementById('headerDrawer');
+  const headerOverlay = document.getElementById('headerOverlay');
+
+  function closeDrawer() {
+    if (!menuToggle || !headerDrawer || !headerOverlay) return;
+    if (!menuToggle.classList.contains('open')) return;
+    menuToggle.classList.remove('open');
+    menuToggle.setAttribute('aria-expanded', 'false');
+    headerDrawer.classList.remove('open');
+    headerOverlay.classList.remove('open');
+    document.body.classList.remove('body-menu-open');
+  }
+
+  if (menuToggle && headerDrawer && headerOverlay) {
+    function toggleMenu() {
+      const open = !menuToggle.classList.contains('open');
+      menuToggle.classList.toggle('open', open);
+      menuToggle.setAttribute('aria-expanded', String(open));
+      headerDrawer.classList.toggle('open', open);
+      headerOverlay.classList.toggle('open', open);
+      document.body.classList.toggle('body-menu-open', open);
+    }
+
+    menuToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleMenu();
+    });
+
+    headerOverlay.addEventListener('click', toggleMenu);
+
+    // Tutup drawer saat menukar mode chat/image
+    modeChat.addEventListener('click', () => {
+      if (menuToggle.classList.contains('open')) toggleMenu();
+    });
+    modeImage.addEventListener('click', () => {
+      if (menuToggle.classList.contains('open')) toggleMenu();
+    });
+  }
+
   elements.chatForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     await handleSend();
@@ -40,10 +81,22 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   elements.clearSessionBtn.addEventListener('click', () => {
+    startNewChat();
+  });
+
+  const newChatBtn = document.getElementById('newChatBtn');
+  if (newChatBtn) {
+    newChatBtn.addEventListener('click', () => {
+      startNewChat();
+    });
+  }
+
+  function startNewChat() {
     ui.clearSession();
     currentMessages = [];
     historyManager.resetCurrent();
-  });
+    closeDrawer();
+  }
 
   async function handleSend() {
     const text = elements.messageInput.value.trim();
@@ -174,35 +227,4 @@ document.addEventListener('DOMContentLoaded', () => {
     modeChat.classList.remove('active');
     elements.messageInput.placeholder = 'Describe the image you want...';
   });
-
-  /* ===== Mobile Header Drawer ===== */
-  const menuToggle = document.getElementById('menuToggle');
-  const headerDrawer = document.getElementById('headerDrawer');
-  const headerOverlay = document.getElementById('headerOverlay');
-
-  if (menuToggle && headerDrawer && headerOverlay) {
-    function toggleMenu() {
-      const open = !menuToggle.classList.contains('open');
-      menuToggle.classList.toggle('open', open);
-      menuToggle.setAttribute('aria-expanded', String(open));
-      headerDrawer.classList.toggle('open', open);
-      headerOverlay.classList.toggle('open', open);
-      document.body.classList.toggle('body-menu-open', open);
-    }
-
-    menuToggle.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleMenu();
-    });
-
-    headerOverlay.addEventListener('click', toggleMenu);
-
-    // Tutup drawer saat menukar mode chat/image
-    modeChat.addEventListener('click', () => {
-      if (menuToggle.classList.contains('open')) toggleMenu();
-    });
-    modeImage.addEventListener('click', () => {
-      if (menuToggle.classList.contains('open')) toggleMenu();
-    });
-  }
 });
