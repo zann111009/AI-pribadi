@@ -15,6 +15,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const modeChat = document.getElementById('modeChat');
   const modeImage = document.getElementById('modeImage');
   let currentMode = 'chat';
+  let currentMessages = [];
+
+  const historyManager = new HistoryManager(ui);
+  historyManager.onSessionLoad = (messages) => {
+    currentMessages = (messages || []).map((m) => ({ role: m.role, content: m.content }));
+  };
 
   elements.chatForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -35,6 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   elements.clearSessionBtn.addEventListener('click', () => {
     ui.clearSession();
+    currentMessages = [];
+    historyManager.resetCurrent();
   });
 
   async function handleSend() {
@@ -49,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ui.hideWelcome();
     ui.clearInput();
     ui.appendUserMessage(text);
+    currentMessages.push({ role: 'user', content: text });
     ui.showClearBtn();
     ui.showTypingIndicator();
     ui.updateSendBtn(false);
@@ -73,7 +82,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const bubble = ui.appendAssistantMessage('');
-        typeOut(bubble, data.response);
+        typeOut(bubble, data.response, (fullResponse) => {
+          currentMessages.push({ role: 'assistant', content: fullResponse });
+          historyManager.addSession(currentMessages, text);
+        });
         return;
       } catch (err) {
         lastError = err;
@@ -87,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ui.showError('Koneksi gagal. Periksa koneksi internet Anda.');
   }
 
-  function typeOut(bubble, text) {
+  function typeOut(bubble, text, onComplete) {
     let index = 0;
     const speed = 12;
     let rendered = '';
@@ -102,6 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(type, speed);
       } else {
         ui.renderMarkdown(bubble, rendered);
+        if (onComplete) onComplete(rendered);
       }
     }
 
