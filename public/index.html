@@ -54,22 +54,17 @@
     <header class="app-header">
       <div class="header-overlay" id="headerOverlay"></div>
       <div class="app-header-inner">
-        <button id="menuToggle" class="menu-btn" aria-label="Buka menu" aria-expanded="false">
-          <span class="menu-line"></span>
-          <span class="menu-line"></span>
-          <span class="menu-line"></span>
-        </button>
-        <div class="header-drawer" id="headerDrawer">
-          <div class="brand">
-            <div class="brand-logo">
-              <img src="/assets/zann-Logo.png" alt="Zann-AI Logo" class="w-full h-full object-cover">
-            </div>
-            <div class="brand-text">
-              <h1 class="brand-title">Zann-AI</h1>
-              <p class="brand-subtitle">Custom Chatbot — Gemini &amp; Image Generation</p>
-            </div>
+        <div class="brand">
+          <div class="brand-logo">
+            <img src="/assets/zann-Logo.png" alt="Zann-AI Logo" class="w-full h-full object-cover">
           </div>
+          <div class="brand-text">
+            <h1 class="brand-title">Zann-AI</h1>
+            <p class="brand-subtitle">Custom Chatbot — Gemini &amp; Image Generation</p>
+          </div>
+        </div>
 
+        <div class="header-drawer" id="headerDrawer">
           <div class="header-actions">
             <button id="clearSessionBtn" class="btn-danger hidden" title="Hapus riwayat percakapan">
               <svg class="btn-icon-only" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -110,6 +105,12 @@
             </button>
           </div>
         </div>
+
+        <button id="menuToggle" class="menu-btn" aria-label="Buka menu" aria-expanded="false">
+          <span class="menu-line"></span>
+          <span class="menu-line"></span>
+          <span class="menu-line"></span>
+        </button>
       </div>
     </header>
 
