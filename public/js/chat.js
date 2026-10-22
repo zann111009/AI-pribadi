@@ -150,6 +150,9 @@ document.addEventListener('DOMContentLoaded', () => {
         typeOut(bubble, data.response, (fullResponse) => {
           currentMessages.push({ role: 'assistant', content: fullResponse });
           historyManager.addSession(currentMessages, text);
+          if (data.finishReason && data.finishReason !== 'STOP') {
+            ui.appendFinishNote(bubble, data.finishReason);
+          }
         });
         return;
       } catch (err) {

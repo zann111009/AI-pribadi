@@ -33,6 +33,7 @@ router.post('/chat', async (req, res, next) => {
       timestamp: new Date().toISOString(),
       sessionSize: session.size(),
       model: result.model,
+      finishReason: result.finishReason,
     });
   } catch (error) {
     next(error);

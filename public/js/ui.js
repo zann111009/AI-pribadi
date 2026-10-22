@@ -173,6 +173,24 @@ class ChatUI {
     return bubble;
   }
 
+  appendFinishNote(bubble, reason) {
+    const labels = {
+      MAX_TOKENS: 'Respons terpotong karena batas panjang (token). Ketik "lanjutkan" untuk melanjutkan.',
+      SAFETY: 'Respons dibatasi karena filter keamanan.',
+      RECITATION: 'Respons dibatasi karena kebijakan hak cipta.',
+      OTHER: 'Respons tidak lengkap.',
+    };
+    const label = labels[reason] || labels.OTHER;
+
+    const note = document.createElement('div');
+    note.className = 'finish-note';
+    note.textContent = label;
+
+    const target = bubble.closest('.message-row') || bubble.closest('.bubble-ai') || bubble;
+    target.appendChild(note);
+    this.scrollToBottom();
+  }
+
   showTypingIndicator() {
     this.els.typingIndicator.classList.remove('hidden');
     this.scrollToBottom();

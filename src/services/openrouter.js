@@ -74,52 +74,64 @@ async function sendMessage(messages, modelOverride, options = {}) {
 
   const url = `${GENERATE_URL(model)}?key=${apiKey}`;
 
-  try {
-    const response = await axios.post(url, body, {
-      headers: { 'Content-Type': 'application/json' },
-      timeout: 180000,
-    });
+  const maxRetries = 3;
+  const baseDelay = 1500;
+  let lastError = null;
 
-    const candidate = response.data?.candidates?.[0];
-    const text = candidate?.content?.parts?.[0]?.text;
-    const finishReason = candidate?.finishReason;
-
-    if (!text) {
-      throw new Error('Respons dari Gemini kosong');
-    }
-
-    console.log(`[Gemini] model=${model} finishReason=${finishReason || '-'}`);
-
-    return { text, model };
-  } catch (error) {
-    const status = error.response?.status;
-    const googleMessage = error.response?.data?.error?.message || error.message;
-
-    console.error(`[GeminiError] model=${model} status=${status} message=${googleMessage}`);
-
-    if (status === 404 && !modelOverride) {
-      console.warn(`[Fallback] Model ${model} tidak ditemukan. Mencari alternatif...`);
-      const models = await listModels(apiKey);
-      const fallback = models.find((m) => {
-        const name = m.name.replace('models/', '');
-        return name.startsWith('gemini-3') && name.includes('flash');
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await axios.post(url, body, {
+        headers: { 'Content-Type': 'application/json' },
+        timeout: 180000,
       });
 
-      if (fallback) {
-        const fallbackName = fallback.name.replace('models/', '');
-        console.warn(`[Fallback] Mencoba ${fallbackName}...`);
-        return sendMessage(messages, fallbackName, options);
-      } else {
-        console.error('[Fallback] Tidak ada model alternatif yang cocok.');
+      const candidate = response.data?.candidates?.[0];
+      const text = candidate?.content?.parts?.[0]?.text;
+      const finishReason = candidate?.finishReason;
+
+      if (!text) {
+        throw new Error('Respons dari Gemini kosong');
       }
-    }
 
-    if (status === 404) {
-      throw new Error('Model AI tidak ditemukan. Periksa GEMINI_MODEL di .env.');
-    }
+      console.log(`[Gemini] model=${model} finishReason=${finishReason || '-'}`);
+      return { text, model, finishReason };
+    } catch (error) {
+      const status = error.response?.status;
+      const googleMessage = error.response?.data?.error?.message || error.message;
+      lastError = error;
 
-    throw error;
+      console.error(`[GeminiError] model=${model} status=${status} message=${googleMessage}`);
+
+      // Coba lagi pada rate limit (429) atau layanan tidak tersedia (503)
+      if ((status === 429 || status === 503) && attempt < maxRetries) {
+        const delay = baseDelay * attempt;
+        console.warn(`[Gemini] ${status}, coba lagi ${attempt}/${maxRetries} setelah ${delay}ms`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        continue;
+      }
+
+      if (status === 404 && !modelOverride) {
+        console.warn(`[Fallback] Model ${model} tidak ditemukan. Mencari alternatif...`);
+        const models = await listModels(apiKey);
+        const fallback = models.find((m) => {
+          const name = m.name.replace('models/', '');
+          return name.startsWith('gemini-3') && name.includes('flash');
+        });
+
+        if (fallback) {
+          const fallbackName = fallback.name.replace('models/', '');
+          console.warn(`[Fallback] Mencoba ${fallbackName}...`);
+          return sendMessage(messages, fallbackName, options);
+        } else {
+          console.error('[Fallback] Tidak ada model alternatif yang cocok.');
+        }
+      }
+
+      throw error;
+    }
   }
+
+  throw lastError;
 }
 
 module.exports = {

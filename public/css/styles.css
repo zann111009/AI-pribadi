@@ -624,6 +624,15 @@ html[data-theme='dark'] #themeIconMoon {
   word-break: break-word;
 }
 
+.finish-note {
+  margin: 0.4rem 0 0 0;
+  font-size: 0.72rem;
+  font-style: italic;
+  opacity: 0.8;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .bubble-ai {
   background: var(--bubble-ai-bg);
   color: var(--bubble-ai-text);
