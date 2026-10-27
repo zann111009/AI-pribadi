@@ -211,6 +211,25 @@ body {
   min-width: 0;
 }
 
+.brand-mobile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.brand {
+  display: none;
+}
+
+.menu-btn {
+  margin-left: auto;
+}
+
+.btn-label {
+  display: inline;
+}
+
 .brand-title {
   margin: 0;
   font-size: 1rem;
@@ -375,6 +394,14 @@ body {
 @media (min-width: 640px) {
   .menu-btn {
     display: none;
+  }
+
+  .brand-mobile {
+    display: none;
+  }
+
+  .brand {
+    display: flex;
   }
 
   .header-overlay {
