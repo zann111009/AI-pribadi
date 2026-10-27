@@ -228,7 +228,7 @@ body {
 
   .btn-label {
     display: inline;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
   }
 
 .brand-title {
@@ -251,12 +251,12 @@ body {
   text-overflow: ellipsis;
 }
 
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-shrink: 0;
-}
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    flex-shrink: 0;
+  }
 
 /* ===== Header Drawer (Mobile Hamburger) ===== */
 
