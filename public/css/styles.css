@@ -226,9 +226,10 @@ body {
   margin-left: auto;
 }
 
-.btn-label {
-  display: inline;
-}
+  .btn-label {
+    display: inline;
+    font-size: 0.7rem;
+  }
 
 .brand-title {
   margin: 0;
