@@ -734,6 +734,12 @@ html[data-theme='dark'] #themeIconMoon {
   box-shadow: 0 6px 18px -12px rgba(var(--shadow-color), 0.35);
 }
 
+.bubble-image-frame {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+
 .bubble-image-el {
   display: block;
   border-radius: 0.6rem;
@@ -741,6 +747,44 @@ html[data-theme='dark'] #themeIconMoon {
   max-height: 24rem;
   height: auto;
   width: auto;
+}
+
+.download-btn {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.9;
+  transition: opacity 0.2s ease, background-color 0.2s ease, transform 0.15s ease;
+  z-index: 5;
+}
+
+.download-btn:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.75);
+}
+
+.download-btn:active {
+  transform: scale(0.94);
+}
+
+.download-btn.done {
+  background: #10b981;
+}
+
+.download-icon {
+  width: 16px;
+  height: 16px;
 }
 
 .bubble-image-caption {
