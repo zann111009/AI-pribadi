@@ -226,10 +226,13 @@ body {
   margin-left: auto;
 }
 
-  .btn-label {
-    display: inline;
-    font-size: 0.65rem;
-  }
+.btn-label {
+  display: block;
+  font-size: 0.6rem;
+  line-height: 1;
+  text-align: center;
+  color: inherit;
+}
 
 .brand-title {
   margin: 0;
@@ -373,20 +376,12 @@ body {
   text-align: left;
 }
 
-.header-drawer .btn-icon .theme-icon {
-  width: 1.15rem;
-  height: 1.15rem;
-}
-
-.header-drawer .btn-icon .history-icon {
-  width: 1.15rem;
-  height: 1.15rem;
-}
-
-.header-drawer .btn-icon .new-chat-icon {
-  width: 1.15rem;
-  height: 1.15rem;
-}
+  .header-drawer .btn-icon .theme-icon,
+  .header-drawer .btn-icon .history-icon,
+  .header-drawer .btn-icon .new-chat-icon {
+    width: 1.05rem;
+    height: 1.05rem;
+  }
 
 .body-menu-open {
   overflow: hidden;
@@ -447,9 +442,13 @@ body {
 
   .header-drawer .btn-danger,
   .header-drawer .btn-icon {
-    width: auto;
+    width: 52px;
+    height: 48px;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
     padding: 0;
+    gap: 0.12rem;
     text-align: center;
   }
 
@@ -482,10 +481,12 @@ body {
 
 .btn-icon {
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  gap: 0.15rem;
+  width: 52px;
+  height: 48px;
   padding: 0;
   border: 1px solid var(--surface-border);
   border-radius: 0.75rem;
@@ -505,18 +506,18 @@ body {
 }
 
 .btn-icon .theme-icon {
-  width: 1.15rem;
-  height: 1.15rem;
+  width: 1.05rem;
+  height: 1.05rem;
 }
 
 .btn-icon .history-icon {
-  width: 1.15rem;
-  height: 1.15rem;
+  width: 1.05rem;
+  height: 1.05rem;
 }
 
 .btn-icon .new-chat-icon {
-  width: 1.15rem;
-  height: 1.15rem;
+  width: 1.05rem;
+  height: 1.05rem;
 }
 
 /* Ikon tema digerakkan oleh data-theme agar tidak ada kilat sebelum JS jalan */
@@ -1832,7 +1833,10 @@ html[data-theme='dark'] #themeIconMoon {
   }
 
   .btn-label {
-    display: none;
+    display: block;
+    font-size: 0.6rem;
+    line-height: 1;
+    text-align: center;
   }
 }
 
