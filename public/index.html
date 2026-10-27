@@ -54,17 +54,22 @@
     <header class="app-header">
       <div class="header-overlay" id="headerOverlay"></div>
       <div class="app-header-inner">
-        <div class="brand">
-          <div class="brand-logo">
-            <img src="/assets/zann-Logo.png" alt="Zann-AI Logo" class="w-full h-full object-cover">
-          </div>
-          <div class="brand-text">
-            <h1 class="brand-title">Zann-AI</h1>
-            <p class="brand-subtitle">Custom Chatbot — Gemini &amp; Image Generation</p>
-          </div>
-        </div>
-
+        <button id="menuToggle" class="menu-btn" aria-label="Buka menu" aria-expanded="false">
+          <span class="menu-line"></span>
+          <span class="menu-line"></span>
+          <span class="menu-line"></span>
+        </button>
         <div class="header-drawer" id="headerDrawer">
+          <div class="brand">
+            <div class="brand-logo">
+              <img src="/assets/zann-Logo.png" alt="Zann-AI Logo" class="w-full h-full object-cover">
+            </div>
+            <div class="brand-text">
+              <h1 class="brand-title">Zann-AI</h1>
+              <p class="brand-subtitle">Custom Chatbot — Gemini &amp; Image Generation</p>
+            </div>
+          </div>
+
           <div class="header-actions">
             <button id="clearSessionBtn" class="btn-danger hidden" title="Hapus riwayat percakapan">
               <svg class="btn-icon-only" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -80,21 +85,18 @@
               <svg id="themeIconMoon" class="theme-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
               </svg>
-              <span class="btn-label">Dark/Light</span>
             </button>
 
             <button id="newChatBtn" class="btn-icon" title="Percakapan baru" aria-label="Percakapan baru" type="button">
               <svg class="new-chat-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
               </svg>
-              <span class="btn-label">New Chat</span>
             </button>
 
             <button id="historyToggle" class="btn-icon" title="Riwayat chat" aria-label="Riwayat chat" aria-pressed="false" type="button">
               <svg class="history-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span class="btn-label">History</span>
             </button>
 
             <button id="profileToggle" class="profile-btn" title="Profil pengguna" aria-label="Profil pengguna" type="button">
@@ -108,12 +110,6 @@
             </button>
           </div>
         </div>
-
-        <button id="menuToggle" class="menu-btn" aria-label="Buka menu" aria-expanded="false">
-          <span class="menu-line"></span>
-          <span class="menu-line"></span>
-          <span class="menu-line"></span>
-        </button>
       </div>
     </header>
 
