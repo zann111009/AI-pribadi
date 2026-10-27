@@ -254,12 +254,28 @@ body {
   text-overflow: ellipsis;
 }
 
-  .header-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.2rem;
-    flex-shrink: 0;
-  }
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.header-actions .btn-icon .btn-label,
+.header-actions .btn-danger .btn-label {
+  display: none !important;
+}
+
+.header-actions .btn-icon {
+  flex-direction: row;
+  gap: 0;
+  width: 44px;
+  height: 44px;
+}
+
+.header-actions .profile-btn-label {
+  display: inline;
+}
 
 /* ===== Header Drawer (Mobile Hamburger) ===== */
 
