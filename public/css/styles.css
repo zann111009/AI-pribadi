@@ -1186,19 +1186,18 @@ body {
 
 .image-skeleton {
   display: flex;
+  flex-direction: column;
   gap: 1rem;
   padding: 1rem 1rem;
-  max-width: 640px;
-  margin: 0 auto;
+  padding-bottom: calc(2rem + env(safe-area-inset-bottom));
+  max-width: none;
   width: 100%;
-}
-
-@media (min-width: 768px) {
-  .image-skeleton {
-    padding: 1.25rem 2rem;
-    max-width: none;
-    margin: 0;
-  }
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .skeleton-img {
@@ -1227,27 +1226,19 @@ body {
 
 .image-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1rem;
   padding: 1rem;
-  max-width: 900px;
-  margin: 0 auto;
+  padding-bottom: calc(2rem + env(safe-area-inset-bottom));
+  max-width: none;
   width: 100%;
-}
-
-@media (min-width: 640px) {
-  .image-grid {
-    grid-template-columns: repeat(2, 1fr);
-    max-width: 700px;
-  }
-}
-
-@media (min-width: 1024px) {
-  .image-grid {
-    grid-template-columns: repeat(3, 1fr);
-    max-width: 900px;
-    padding: 1.5rem 2rem;
-  }
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
 }
 
 .image-result {
@@ -1279,7 +1270,7 @@ body {
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
 }
 

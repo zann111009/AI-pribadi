@@ -325,6 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ui.clearImageResults();
     ui.hideImageError();
     ui.showImageSkeleton();
+    document.getElementById('imageSkeleton')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     elements.imageSendBtn.disabled = true;
 
     try {
@@ -351,6 +352,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       ui.hideImageSkeleton();
       ui.appendImageResult(url, prompt, data.mimeType || 'image/jpeg');
+      const results = document.querySelectorAll('#imageResults .image-result');
+      if (results.length) {
+        results[results.length - 1].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
 
       // Simpan ke riwayat supaya gambar tetap ada setelah reload
       currentMessages.push({ role: 'user', content: prompt });
