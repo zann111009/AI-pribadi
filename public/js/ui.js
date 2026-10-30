@@ -116,6 +116,7 @@ class ChatUI {
   }
 
   scrollToBottom() {
+    if (!this.els.messagesArea) return;
     this.els.messagesArea.scrollTo({
       top: this.els.messagesArea.scrollHeight,
       behavior: 'smooth',
@@ -192,48 +193,61 @@ class ChatUI {
   }
 
   showTypingIndicator() {
-    this.els.typingIndicator.classList.remove('hidden');
+    if (this.els.typingIndicator) this.els.typingIndicator.classList.remove('hidden');
     this.scrollToBottom();
   }
 
   hideTypingIndicator() {
-    this.els.typingIndicator.classList.add('hidden');
+    if (this.els.typingIndicator) this.els.typingIndicator.classList.add('hidden');
   }
 
   hideWelcome() {
-    this.els.welcomeMessage.classList.add('hidden');
+    if (this.els.welcomeMessage) this.els.welcomeMessage.classList.add('hidden');
+    if (this.els.promptSuggestions) this.els.promptSuggestions.classList.add('hidden');
+  }
+
+  showPromptSuggestions() {
+    if (this.els.promptSuggestions) this.els.promptSuggestions.classList.remove('hidden');
+  }
+
+  hidePromptSuggestions() {
+    if (this.els.promptSuggestions) this.els.promptSuggestions.classList.add('hidden');
   }
 
   showError(message) {
-    this.els.errorToast.classList.remove('hidden');
-    this.els.errorText.textContent = message;
-    setTimeout(() => {
-      this.els.errorToast.classList.add('hidden');
-    }, 5000);
+    if (this.els.errorToast && this.els.errorText) {
+      this.els.errorToast.classList.remove('hidden');
+      this.els.errorText.textContent = message;
+      setTimeout(() => {
+        this.els.errorToast.classList.add('hidden');
+      }, 5000);
+    }
   }
 
   updateSendBtn(enabled) {
-    this.els.sendBtn.disabled = !enabled;
+    if (this.els.sendBtn) this.els.sendBtn.disabled = !enabled;
   }
 
   clearInput() {
-    this.els.messageInput.value = '';
-    this.els.messageInput.style.height = 'auto';
-    this.updateSendBtn(false);
-    this.els.messageInput.focus();
+    if (this.els.messageInput) {
+      this.els.messageInput.value = '';
+      this.els.messageInput.style.height = 'auto';
+      this.updateSendBtn(false);
+      this.els.messageInput.focus();
+    }
   }
 
   clearSession() {
     this.els.messagesArea.innerHTML = '';
     this.hideWelcome();
-    this.els.clearSessionBtn.classList.add('hidden');
+    if (this.els.clearSessionBtn) this.els.clearSessionBtn.classList.add('hidden');
     this.revokeObjectUrls();
     this.appendWelcome();
   }
 
   appendWelcome() {
     const div = document.createElement('div');
-    div.className = 'message-row';
+    div.className = 'message-row welcome-row';
     div.innerHTML = `
       <div class="avatar-ai">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -246,10 +260,11 @@ class ChatUI {
     `;
     this.els.messagesArea.appendChild(div);
     this.scrollToBottom();
+    this.showPromptSuggestions();
   }
 
   showClearBtn() {
-    this.els.clearSessionBtn.classList.remove('hidden');
+    if (this.els.clearSessionBtn) this.els.clearSessionBtn.classList.remove('hidden');
   }
 
   escapeHTML(str) {
@@ -257,6 +272,8 @@ class ChatUI {
     div.textContent = str;
     return div.innerHTML;
   }
+
+  /* ===== Legacy image display (used by history loading) ===== */
 
   showImage(url, prompt, mimeType = 'image/jpeg') {
     const div = document.createElement('div');
@@ -282,9 +299,7 @@ class ChatUI {
       </div>
     `;
 
-    const img = div.querySelector('.bubble-image-el');
     const btn = div.querySelector('.download-btn');
-
     if (btn) {
       btn.addEventListener('click', () => {
         this.downloadImage(url, prompt, mimeType, btn);
@@ -295,14 +310,90 @@ class ChatUI {
     this.scrollToBottom();
   }
 
+  /* ===== Image Tab: Result Grid ===== */
+
+  appendImageResult(url, prompt, mimeType = 'image/jpeg') {
+    if (!this.els.imageResults) return;
+
+    const div = document.createElement('div');
+    div.className = 'image-result';
+    div.innerHTML = `
+      <div class="image-result-frame">
+        <img src="${url}" alt="Generated Image" class="image-result-img">
+        <div class="image-result-actions">
+          <button class="image-result-btn" type="button" title="Unduh gambar" aria-label="Unduh gambar">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3v12" />
+              <path d="m7 10 5 5 5-5" />
+              <path d="M5 21h14" />
+            </svg>
+          </button>
+          <button class="image-result-btn" type="button" title="Buat ulang" aria-label="Buat ulang gambar">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="1 4 1 10 7 10"/><polyline points="23 4 23 10 17 10"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path d="M10 16h4v-4h-4z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <p class="image-result-caption">${this.escapeHTML(prompt)}</p>
+    `;
+
+    const dlBtn = div.querySelector('.image-result-btn:first-child');
+    const reBtn = div.querySelector('.image-result-btn:nth-child(2)');
+    const img = div.querySelector('.image-result-img');
+
+    if (dlBtn) {
+      dlBtn.addEventListener('click', () => {
+        this.downloadImage(url, prompt, mimeType, dlBtn);
+      });
+    }
+
+    if (reBtn && img) {
+      reBtn.addEventListener('click', () => {
+        const src = img.src;
+        this.downloadImage(src, prompt, mimeType, reBtn);
+      });
+    }
+
+    this.els.imageResults.appendChild(div);
+    if (this.els.imageSkeleton) this.els.imageSkeleton.classList.add('hidden');
+    if (this.els.imageError) this.els.imageError.classList.add('hidden');
+  }
+
+  clearImageResults() {
+    if (this.els.imageResults) this.els.imageResults.innerHTML = '';
+  }
+
+  showImageSkeleton() {
+    if (this.els.imageSkeleton) this.els.imageSkeleton.classList.remove('hidden');
+    if (this.els.imageError) this.els.imageError.classList.add('hidden');
+    this.clearImageResults();
+  }
+
+  hideImageSkeleton() {
+    if (this.els.imageSkeleton) this.els.imageSkeleton.classList.add('hidden');
+  }
+
+  showImageError(message) {
+    if (this.els.imageError && this.els.imageErrorText) {
+      this.els.imageErrorText.textContent = message;
+      this.els.imageError.classList.remove('hidden');
+    }
+    this.hideImageSkeleton();
+  }
+
+  hideImageError() {
+    if (this.els.imageError) this.els.imageError.classList.add('hidden');
+  }
+
+  /* ===== Download (kept from original) ===== */
+
   async downloadImage(url, prompt, mimeType, btn) {
     if (!url) return;
 
     let href = url;
     let revokeAfter = false;
 
-    // Atribut "download" diabaikan browser untuk URL lintas domain,
-    // jadi ambil dulu sebagai blob lalu pakai object URL lokal.
     const isRemote = url.startsWith('http') && !url.startsWith(window.location.origin);
     if (isRemote) {
       try {

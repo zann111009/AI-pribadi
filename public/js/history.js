@@ -15,6 +15,8 @@ class HistoryManager {
       historyClose: document.getElementById('historyClose'),
       historyList: document.getElementById('historyList'),
       historyEmpty: document.getElementById('historyEmpty'),
+      sidebarHistoryList: document.getElementById('sidebarHistoryList'),
+      sidebarHistoryEmpty: document.getElementById('sidebarHistoryEmpty'),
     };
 
     this.load();
@@ -40,13 +42,18 @@ class HistoryManager {
   }
 
   render() {
-    if (!this.els.historyList) return;
-    this.els.historyList.innerHTML = '';
+    this.renderToList(this.els.historyList, this.els.historyEmpty);
+    this.renderToList(this.els.sidebarHistoryList, this.els.sidebarHistoryEmpty);
+  }
+
+  renderToList(listEl, emptyEl) {
+    if (!listEl) return;
+    listEl.innerHTML = '';
 
     const hasItems = this.history.length > 0;
 
-    if (this.els.historyList) this.els.historyList.classList.toggle('is-hidden', !hasItems);
-    if (this.els.historyEmpty) this.els.historyEmpty.classList.toggle('is-hidden', hasItems);
+    if (listEl) listEl.classList.toggle('is-hidden', !hasItems);
+    if (emptyEl) emptyEl.classList.toggle('is-hidden', hasItems);
 
     if (!hasItems) return;
 
@@ -84,7 +91,7 @@ class HistoryManager {
         this.deleteSession(session.id);
       });
 
-      this.els.historyList.appendChild(item);
+      listEl.appendChild(item);
     });
   }
 
@@ -197,13 +204,13 @@ class HistoryManager {
   openPanel() {
     if (!this.els.historyPanel) return;
 
-    const menuToggle = document.getElementById('menuToggle');
-    const headerDrawer = document.getElementById('headerDrawer');
+    const menuToggle = document.getElementById('mobileMenuToggle');
+    const appSidebar = document.getElementById('appSidebar');
     const headerOverlay = document.getElementById('headerOverlay');
     if (menuToggle && menuToggle.classList.contains('open')) {
       menuToggle.classList.remove('open');
       menuToggle.setAttribute('aria-expanded', 'false');
-      headerDrawer.classList.remove('open');
+      appSidebar.classList.remove('open');
       headerOverlay.classList.remove('open');
       document.body.classList.remove('body-menu-open');
     }
@@ -211,7 +218,7 @@ class HistoryManager {
     this.els.historyPanel.classList.add('open');
     this.els.historyOverlay.classList.add('open');
     document.body.classList.add('body-menu-open');
-    this.els.historyToggle.setAttribute('aria-pressed', 'true');
+    if (this.els.historyToggle) this.els.historyToggle.setAttribute('aria-pressed', 'true');
     this.render();
   }
 
@@ -220,7 +227,7 @@ class HistoryManager {
     this.els.historyPanel.classList.remove('open');
     this.els.historyOverlay.classList.remove('open');
     document.body.classList.remove('body-menu-open');
-    this.els.historyToggle.setAttribute('aria-pressed', 'false');
+    if (this.els.historyToggle) this.els.historyToggle.setAttribute('aria-pressed', 'false');
   }
 
   togglePanel() {
