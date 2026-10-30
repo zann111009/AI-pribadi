@@ -168,13 +168,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  const newChatBtn = document.getElementById('newChatBtn');
-  if (newChatBtn) {
-    newChatBtn.addEventListener('click', () => {
-      startNewChat();
-    });
-  }
-
   elements.clearSessionBtn.addEventListener('click', () => {
     startNewChat();
   });

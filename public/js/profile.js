@@ -9,9 +9,9 @@ class ProfileManager {
     this.pendingPhoto = '';
 
     this.els = {
-      profileToggle: document.getElementById('profileToggle'),
-      profileTogglePhoto: document.getElementById('profileTogglePhoto'),
-      profileToggleIcon: document.getElementById('profileToggleIcon'),
+      profileToggle: document.getElementById('sidebarProfileBtn'),
+      profileTogglePhoto: document.getElementById('sidebarProfilePhoto'),
+      profileToggleIcon: document.getElementById('sidebarProfileIcon'),
       profileModal: document.getElementById('profileModal'),
       profileOverlay: document.getElementById('profileOverlay'),
       profileClose: document.getElementById('profileClose'),

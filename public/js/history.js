@@ -9,7 +9,7 @@ class HistoryManager {
     this.onSessionLoad = null;
 
     this.els = {
-      historyToggle: document.getElementById('historyToggle'),
+      historyToggle: document.getElementById('mobileHistoryToggle'),
       historyPanel: document.getElementById('historyPanel'),
       historyOverlay: document.getElementById('historyOverlay'),
       historyClose: document.getElementById('historyClose'),

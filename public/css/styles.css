@@ -2136,3 +2136,35 @@ textarea:focus-visible {
 .finish-continue:hover {
   background: var(--accent-hover);
 }
+
+/* ===== Utilitas kelas yang digunakan HTML tapi belum didefinisikan ===== */
+
+.hidden {
+  display: none !important;
+}
+
+.theme-toggle-btn {
+  /* Marker class untuk tombol tema; gaya diatur oleh .sidebar-theme-toggle / .bar-icon-btn */
+}
+
+.profile-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.profile-close:hover {
+  background: var(--surface-alt);
+  color: var(--text);
+}

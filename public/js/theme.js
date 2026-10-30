@@ -3,8 +3,8 @@ const THEME_KEY = 'ai-pribadi-theme';
 class ThemeManager {
   constructor() {
     this.toggleBtns = document.querySelectorAll('.theme-toggle-btn');
-    this.sunIcon = document.getElementById('themeIconSun');
-    this.moonIcon = document.getElementById('themeIconMoon');
+    this.sunIcon = document.getElementById('sidebarThemeIconSun');
+    this.moonIcon = document.getElementById('sidebarThemeIconMoon');
     this.media = window.matchMedia('(prefers-color-scheme: dark)');
     this.current = document.documentElement.getAttribute('data-theme') || 'light';
 
