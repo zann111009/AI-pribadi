@@ -2,15 +2,15 @@ const THEME_KEY = 'ai-pribadi-theme';
 
 class ThemeManager {
   constructor() {
-    this.toggleBtn = document.getElementById('themeToggle');
+    this.toggleBtns = document.querySelectorAll('.theme-toggle-btn');
     this.sunIcon = document.getElementById('themeIconSun');
     this.moonIcon = document.getElementById('themeIconMoon');
     this.media = window.matchMedia('(prefers-color-scheme: dark)');
     this.current = document.documentElement.getAttribute('data-theme') || 'light';
 
-    if (this.toggleBtn) {
-      this.toggleBtn.addEventListener('click', () => this.toggle());
-    }
+    this.toggleBtns.forEach((btn) => {
+      btn.addEventListener('click', () => this.toggle());
+    });
 
     if (this.media.addEventListener) {
       this.media.addEventListener('change', (e) => {
@@ -23,6 +23,8 @@ class ThemeManager {
     }
 
     this.sync();
+
+    window.themeManager = this;
   }
 
   getSaved() {
