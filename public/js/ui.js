@@ -174,21 +174,59 @@ class ChatUI {
     return bubble;
   }
 
-  appendFinishNote(bubble, reason) {
+  appendFinishNote(bubble, reason, onContinue) {
     const labels = {
-      MAX_TOKENS: 'Respons terpotong karena batas panjang (token). Ketik "lanjutkan" untuk melanjutkan.',
+      MAX_TOKENS: 'Respons terpotong karena terlalu panjang.',
       SAFETY: 'Respons dibatasi karena filter keamanan.',
       RECITATION: 'Respons dibatasi karena kebijakan hak cipta.',
       OTHER: 'Respons tidak lengkap.',
     };
     const label = labels[reason] || labels.OTHER;
 
+    const row = bubble.closest('.message-row') || bubble.closest('.bubble-ai') || bubble;
+    if (row.querySelector('.finish-note')) return;
+
     const note = document.createElement('div');
     note.className = 'finish-note';
-    note.textContent = label;
+    note.innerHTML = `
+      <span class="finish-label">${this.escapeHTML(label)}</span>
+      ${onContinue ? '<button class="finish-continue" type="button">Lanjutkan</button>' : ''}
+    `;
 
-    const target = bubble.closest('.message-row') || bubble.closest('.bubble-ai') || bubble;
-    target.appendChild(note);
+    const style = note.style;
+    style.marginTop = '0.5rem';
+    style.padding = '0.5rem 0.75rem';
+    style.borderRadius = '0.5rem';
+    style.background = 'rgba(99, 102, 241, 0.1)';
+    style.border = '1px solid rgba(99, 102, 241, 0.25)';
+    style.color = 'var(--text)';
+    style.fontSize = '0.78rem';
+    style.lineHeight = '1.4';
+    style.display = 'flex';
+    style.alignItems = 'center';
+    style.gap = '0.6rem';
+    style.flexWrap = 'wrap';
+
+    const labelEl = note.querySelector('.finish-label');
+    labelEl.style.fontWeight = '600';
+    labelEl.style.color = 'var(--text-muted)';
+
+    const btn = note.querySelector('.finish-continue');
+    if (btn && onContinue) {
+      btn.style.marginLeft = 'auto';
+      btn.style.marginRight = '0';
+      btn.style.padding = '0.25rem 0.6rem';
+      btn.style.fontSize = '0.78rem';
+      btn.style.fontWeight = '600';
+      btn.style.color = '#ffffff';
+      btn.style.background = 'var(--accent)';
+      btn.style.border = 'none';
+      btn.style.borderRadius = '0.5rem';
+      btn.style.cursor = 'pointer';
+      btn.addEventListener('click', onContinue);
+    }
+
+    row.appendChild(note);
     this.scrollToBottom();
   }
 

@@ -26,8 +26,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const modeImage = document.getElementById('modeImage');
   let currentMode = 'chat';
   let currentMessages = [];
+  let lastUserMessage = '';
   let selectedStyle = 'realistis';
   let selectedRatio = '1:1';
+
+  // TODO: Backend /api/generate-image hanya menerima { prompt } (lihat src/routes/chat.js:74).
+  // Chip gaya dan rasio di UI saat ini hanya visual; belum dikirim ke API agar logika generate tidak diubah.
 
   const historyManager = new HistoryManager(ui);
   historyManager.onSessionLoad = (messages) => {
@@ -73,6 +77,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     headerOverlay.addEventListener('click', closeDrawer);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && menuToggle.classList.contains('open')) closeDrawer();
+    });
   }
 
   /* ===== Tab Switching ===== */
@@ -187,20 +195,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  if (sidebarThemeToggle) {
-    sidebarThemeToggle.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (window.themeManager) window.themeManager.toggle();
-    });
-  }
-
-  if (mobileThemeToggle) {
-    mobileThemeToggle.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (window.themeManager) window.themeManager.toggle();
-    });
-  }
-
   if (mobileHistoryToggle) {
     mobileHistoryToggle.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -268,6 +262,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const text = elements.messageInput.value.trim();
     if (!text) return;
 
+    lastUserMessage = text;
+
     ui.hideWelcome();
     ui.clearInput();
     ui.appendUserMessage(text);
@@ -300,7 +296,11 @@ document.addEventListener('DOMContentLoaded', () => {
           currentMessages.push({ role: 'assistant', content: fullResponse });
           historyManager.addSession(currentMessages, text);
           if (data.finishReason && data.finishReason !== 'STOP') {
-            ui.appendFinishNote(bubble, data.finishReason);
+            ui.appendFinishNote(bubble, data.finishReason, () => {
+              elements.messageInput.value = lastUserMessage;
+              ui.updateSendBtn(true);
+              handleSend();
+            });
           }
         });
         return;
