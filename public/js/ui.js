@@ -412,10 +412,11 @@ class ChatUI {
     if (this.els.imageSkeleton) this.els.imageSkeleton.classList.add('hidden');
   }
 
-  showImageError(message) {
+  showImageError(message, isRateLimit) {
     if (this.els.imageError && this.els.imageErrorText) {
       this.els.imageErrorText.textContent = message;
       this.els.imageError.classList.remove('hidden');
+      this.els.imageError.classList.toggle('image-error-ratelimit', Boolean(isRateLimit));
     }
     this.hideImageSkeleton();
   }

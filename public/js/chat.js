@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let lastUserMessage = '';
   let selectedStyle = 'realistis';
   let selectedRatio = '1:1';
+  let imageCooldownUntil = 0;
 
   // TODO: Backend /api/generate-image hanya menerima { prompt } (lihat src/routes/chat.js:74).
   // Chip gaya dan rasio di UI saat ini hanya visual; belum dikirim ke API agar logika generate tidak diubah.
@@ -331,8 +332,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        ui.showImageError(data.error || 'Gagal membuat gambar');
-        elements.imageSendBtn.disabled = elements.imagePrompt.value.trim().length === 0;
+        const isRateLimit = /402|kredit tidak cukup|membatasi 1 gambar per 45 detik|rateLimited/i.test(data.error || '');
+        ui.showImageError(data.error || 'Gagal membuat gambar', isRateLimit);
+        if (isRateLimit) {
+          imageCooldownUntil = Date.now() + 45000;
+        }
+        elements.imageSendBtn.disabled = true;
         return;
       }
 
@@ -363,8 +368,30 @@ document.addEventListener('DOMContentLoaded', () => {
       ui.hideImageSkeleton();
       ui.showImageError('Koneksi gagal');
     } finally {
-      elements.imageSendBtn.disabled = elements.imagePrompt.value.trim().length === 0;
+      const now = Date.now();
+      if (now < imageCooldownUntil) {
+        elements.imageSendBtn.disabled = true;
+        startImageCooldown();
+      } else {
+        elements.imageSendBtn.disabled = elements.imagePrompt.value.trim().length === 0;
+      }
     }
+  }
+
+  function startImageCooldown() {
+    const update = () => {
+      const now = Date.now();
+      const remaining = Math.ceil((imageCooldownUntil - now) / 1000);
+      if (remaining > 0) {
+        elements.imageSendBtn.disabled = true;
+        elements.imageSendBtn.textContent = `Tunggu ${remaining} detik`;
+        setTimeout(update, 1000);
+      } else {
+        elements.imageSendBtn.disabled = elements.imagePrompt.value.trim().length === 0;
+        elements.imageSendBtn.textContent = 'Buat Gambar';
+      }
+    };
+    update();
   }
 
   function getUserName() {
