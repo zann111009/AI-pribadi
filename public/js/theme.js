@@ -53,11 +53,11 @@ class ThemeManager {
 
   sync() {
     const isDark = this.current === 'dark';
-    if (this.toggleBtn) {
-      this.toggleBtn.title = isDark ? 'Mode terang' : 'Mode gelap';
-      this.toggleBtn.setAttribute('aria-label', isDark ? 'Mode terang' : 'Mode gelap');
-      this.toggleBtn.setAttribute('aria-pressed', String(isDark));
-    }
+    this.toggleBtns.forEach((btn) => {
+      btn.title = isDark ? 'Mode terang' : 'Mode gelap';
+      btn.setAttribute('aria-label', isDark ? 'Mode terang' : 'Mode gelap');
+      btn.setAttribute('aria-pressed', String(isDark));
+    });
   }
 
   toggle() {
