@@ -296,7 +296,8 @@ img {
 }
 
 /* ---------- Utility ---------- */
-[hidden] {
+[hidden],
+.hidden {
   display: none !important;
 }
 
