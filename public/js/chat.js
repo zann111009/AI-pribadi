@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     imageSkeleton: document.getElementById('imageSkeleton'),
     imageError: document.getElementById('imageError'),
     imageErrorText: document.getElementById('imageErrorText'),
+    imageEmpty: document.getElementById('imageEmpty'),
     promptSuggestions: document.getElementById('promptSuggestions'),
     tabChat: document.getElementById('tabChat'),
     tabImage: document.getElementById('tabImage'),
@@ -25,6 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const ui = new ChatUI(elements);
   const modeChat = document.getElementById('modeChat');
   const modeImage = document.getElementById('modeImage');
+  const segmentedControl = document.querySelector('.segmented-control');
+  const segmentedThumb = document.querySelector('.segmented-thumb');
   let currentMode = 'chat';
   let currentMessages = [];
   let lastUserMessage = '';
@@ -48,7 +51,76 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
-  /* ===== Mobile Sidebar Drawer ===== */
+  /* ===== Segmented Control: thumb + keyboard ===== */
+  function updateSegmentedThumb() {
+    if (!segmentedControl || !segmentedThumb) return;
+    const activeBtn = segmentedControl.querySelector('[aria-selected="true"]');
+    if (!activeBtn) return;
+    const rect = activeBtn.getBoundingClientRect();
+    const parentRect = segmentedControl.getBoundingClientRect();
+    segmentedThumb.style.transform = `translateX(${rect.left - parentRect.left}px)`;
+    segmentedThumb.style.width = `${rect.width}px`;
+  }
+
+  function setTabActive(activeId) {
+    const buttons = segmentedControl ? segmentedControl.querySelectorAll('button') : [];
+    buttons.forEach((btn) => {
+      const isActive = btn.id === activeId;
+      btn.setAttribute('aria-selected', String(isActive));
+    });
+    updateSegmentedThumb();
+  }
+
+  function setMode(mode) {
+    currentMode = mode;
+
+    if (mode === 'chat') {
+      setTabActive('modeChat');
+      elements.tabChat.classList.add('active');
+      elements.tabChat.classList.remove('hidden');
+      elements.tabImage.classList.remove('active');
+      elements.tabImage.classList.add('hidden');
+      elements.inputDock.style.display = 'block';
+      elements.messageInput.placeholder = 'Ketik pesan Anda...';
+      if (elements.messageInput.value.trim() === '') {
+        ui.showPromptSuggestions();
+      }
+    } else {
+      setTabActive('modeImage');
+      elements.tabImage.classList.add('active');
+      elements.tabImage.classList.remove('hidden');
+      elements.tabChat.classList.remove('active');
+      elements.tabChat.classList.add('hidden');
+      elements.inputDock.style.display = 'none';
+      elements.imagePrompt.placeholder = 'Deskripsikan gambar yang ingin Anda buat...';
+      ui.hidePromptSuggestions();
+    }
+    closeDrawer();
+  }
+
+  if (segmentedControl) {
+    segmentedControl.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn || !btn.id) return;
+      setMode(btn.id === 'modeChat' ? 'chat' : 'image');
+    });
+
+    segmentedControl.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        const buttons = Array.from(segmentedControl.querySelectorAll('button'));
+        const current = buttons.findIndex((b) => b.id === (currentMode === 'chat' ? 'modeChat' : 'modeImage'));
+        let next = current;
+        if (e.key === 'ArrowRight') next = (current + 1) % buttons.length;
+        if (e.key === 'ArrowLeft') next = (current - 1 + buttons.length) % buttons.length;
+        setMode(buttons[next].id === 'modeChat' ? 'chat' : 'image');
+        buttons[next].focus();
+      }
+    });
+
+    window.addEventListener('resize', updateSegmentedThumb);
+    updateSegmentedThumb();
+  }
   const menuToggle = document.getElementById('mobileMenuToggle');
   const appSidebar = document.getElementById('appSidebar');
   const headerOverlay = document.getElementById('headerOverlay');
@@ -60,7 +132,8 @@ document.addEventListener('DOMContentLoaded', () => {
     menuToggle.setAttribute('aria-expanded', 'false');
     appSidebar.classList.remove('open');
     headerOverlay.classList.remove('open');
-    document.body.classList.remove('body-menu-open');
+    document.body.classList.remove('menu-open');
+    menuToggle.focus();
   }
 
   if (menuToggle && appSidebar && headerOverlay) {
@@ -70,7 +143,14 @@ document.addEventListener('DOMContentLoaded', () => {
       menuToggle.setAttribute('aria-expanded', String(open));
       appSidebar.classList.toggle('open', open);
       headerOverlay.classList.toggle('open', open);
-      document.body.classList.toggle('body-menu-open', open);
+      document.body.classList.toggle('menu-open', open);
+      if (open) {
+        // Fokus pindah ke first focusable di drawer
+        const firstFocusable = appSidebar.querySelector('button, [href], input, [tabindex]:not([tabindex="-1"])');
+        if (firstFocusable) firstFocusable.focus();
+      } else {
+        menuToggle.focus();
+      }
     }
 
     menuToggle.addEventListener('click', (e) => {
@@ -140,11 +220,8 @@ document.addEventListener('DOMContentLoaded', () => {
       elements.imagePrompt.placeholder = 'Describe the image you want...';
       ui.hidePromptSuggestions();
     }
-    closeDrawer();
-  }
-
-  modeChat.addEventListener('click', () => setMode('chat'));
-  modeImage.addEventListener('click', () => setMode('image'));
+  closeDrawer();
+}
 
   /* ===== Prompt Suggestions ===== */
 
@@ -201,6 +278,63 @@ document.addEventListener('DOMContentLoaded', () => {
     startNewChat();
   });
 
+  const sidebarClearHistoryBtn = document.getElementById('sidebarClearHistoryBtn');
+  const deleteConfirm = document.getElementById('historyDeleteConfirm');
+  const btnDeleteConfirm = document.getElementById('btnDeleteConfirm');
+  const btnDeleteCancel = document.getElementById('btnDeleteCancel');
+
+  let deleteConfirmResolve = null;
+
+  function showDeleteConfirm() {
+    if (!deleteConfirm) return;
+    deleteConfirm.classList.add('open');
+    return new Promise((resolve) => {
+      deleteConfirmResolve = resolve;
+    });
+  }
+
+  function hideDeleteConfirm() {
+    if (!deleteConfirm) return;
+    deleteConfirm.classList.remove('open');
+  }
+
+  if (sidebarClearHistoryBtn) {
+    sidebarClearHistoryBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (historyManager.history.length === 0) return;
+      await showDeleteConfirm();
+      const confirmed = await new Promise((resolve) => {
+        deleteConfirmResolve = resolve;
+        if (btnDeleteConfirm) btnDeleteConfirm.onclick = () => resolve(true);
+        if (btnDeleteCancel) btnDeleteCancel.onclick = () => resolve(false);
+      });
+      hideDeleteConfirm();
+      if (confirmed) {
+        historyManager.history = [];
+        historyManager.save();
+        historyManager.render();
+        if (historyManager.currentSessionId) {
+          historyManager.currentSessionId = null;
+          ui.clearSession();
+        }
+      }
+    });
+  }
+
+  if (btnDeleteCancel) {
+    btnDeleteCancel.addEventListener('click', () => {
+      hideDeleteConfirm();
+      if (deleteConfirmResolve) deleteConfirmResolve(false);
+    });
+  }
+
+  if (btnDeleteConfirm) {
+    btnDeleteConfirm.addEventListener('click', () => {
+      hideDeleteConfirm();
+      if (deleteConfirmResolve) deleteConfirmResolve(true);
+    });
+  }
+
   /* ===== Profile / Theme (mobile top bar) ===== */
 
   const sidebarProfileBtn = document.getElementById('sidebarProfileBtn');
@@ -208,14 +342,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const mobileThemeToggle = document.getElementById('mobileThemeToggle');
   const mobileHistoryToggle = document.getElementById('mobileHistoryToggle');
   const mobileProfileToggle = document.getElementById('mobileProfileToggle');
-
-  if (sidebarProfileBtn) {
-    sidebarProfileBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (window.profileManager) window.profileManager.open();
-      closeDrawer();
-    });
-  }
 
   if (mobileHistoryToggle) {
     mobileHistoryToggle.addEventListener('click', (e) => {
@@ -262,17 +388,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ===== Chip Selection (Style / Ratio) ===== */
 
-  document.querySelectorAll('.chip[data-style]').forEach((chip) => {
+  document.querySelectorAll('.style-chip[data-style]').forEach((chip) => {
     chip.addEventListener('click', () => {
-      document.querySelectorAll('.chip[data-style]').forEach((c) => c.classList.remove('active'));
+      document.querySelectorAll('.style-chip[data-style]').forEach((c) => c.classList.remove('active'));
       chip.classList.add('active');
       selectedStyle = chip.getAttribute('data-style') || selectedStyle;
     });
   });
 
-  document.querySelectorAll('.chip[data-ratio]').forEach((chip) => {
+  document.querySelectorAll('.ratio-chip[data-ratio]').forEach((chip) => {
     chip.addEventListener('click', () => {
-      document.querySelectorAll('.chip[data-ratio]').forEach((c) => c.classList.remove('active'));
+      document.querySelectorAll('.ratio-chip[data-ratio]').forEach((c) => c.classList.remove('active'));
       chip.classList.add('active');
       selectedRatio = chip.getAttribute('data-ratio') || selectedRatio;
     });
@@ -347,8 +473,13 @@ document.addEventListener('DOMContentLoaded', () => {
     ui.clearImageResults();
     ui.hideImageError();
     ui.showImageSkeleton();
+    ui.hideImageEmpty();
     document.getElementById('imageSkeleton')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     elements.imageSendBtn.disabled = true;
+    const btnText = elements.imageSendBtn.querySelector('.btn-image-text');
+    const btnSpinner = elements.imageSendBtn.querySelector('.btn-image-spinner');
+    if (btnText) btnText.textContent = 'Membuat…';
+    if (btnSpinner) btnSpinner.classList.remove('is-hidden');
 
     try {
       const response = await fetch('/api/generate-image', {
@@ -366,6 +497,11 @@ document.addEventListener('DOMContentLoaded', () => {
           imageCooldownUntil = Date.now() + 45000;
         }
         elements.imageSendBtn.disabled = true;
+        const btnText = elements.imageSendBtn.querySelector('.btn-image-text');
+        const btnSpinner = elements.imageSendBtn.querySelector('.btn-image-spinner');
+        if (btnText) btnText.textContent = 'Buat Gambar';
+        if (btnSpinner) btnSpinner.classList.add('is-hidden');
+        ui.showImageEmpty();
         return;
       }
 
@@ -378,10 +514,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
       ui.hideImageSkeleton();
       ui.appendImageResult(url, prompt, data.mimeType || 'image/jpeg');
+      ui.hideImageEmpty();
       const results = document.querySelectorAll('#imageResults .image-result');
       if (results.length) {
         results[results.length - 1].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
+      const btnText = elements.imageSendBtn.querySelector('.btn-image-text');
+      const btnSpinner = elements.imageSendBtn.querySelector('.btn-image-spinner');
+      if (btnText) btnText.textContent = 'Buat Gambar';
+      if (btnSpinner) btnSpinner.classList.add('is-hidden');
 
       // Simpan ke riwayat supaya gambar tetap ada setelah reload
       currentMessages.push({ role: 'user', content: prompt });
@@ -395,6 +536,11 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       ui.hideImageSkeleton();
       ui.showImageError('Koneksi gagal');
+      const btnText = elements.imageSendBtn.querySelector('.btn-image-text');
+      const btnSpinner = elements.imageSendBtn.querySelector('.btn-image-spinner');
+      if (btnText) btnText.textContent = 'Buat Gambar';
+      if (btnSpinner) btnSpinner.classList.add('is-hidden');
+      ui.showImageEmpty();
     } finally {
       const now = Date.now();
       if (now < imageCooldownUntil) {
@@ -402,6 +548,10 @@ document.addEventListener('DOMContentLoaded', () => {
         startImageCooldown();
       } else {
         elements.imageSendBtn.disabled = elements.imagePrompt.value.trim().length === 0;
+        // Show empty state if no results yet
+        if (elements.imageResults && !elements.imageResults.querySelector('.image-result')) {
+          ui.showImageEmpty();
+        }
       }
     }
   }

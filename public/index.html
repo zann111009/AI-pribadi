@@ -54,7 +54,12 @@
           <span>Chat baru</span>
         </button>
 
-        <h3 class="sidebar-section-title">Riwayat Chat</h3>
+        <h3 class="sidebar-section-title">
+          Riwayat Chat
+          <button id="sidebarClearHistoryBtn" class="sidebar-history-delete-btn" type="button" title="Hapus semua riwayat" aria-label="Hapus semua riwayat chat">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+          </button>
+        </h3>
         <div class="sidebar-history-list" id="sidebarHistoryList"></div>
         <div class="sidebar-history-empty" id="sidebarHistoryEmpty">Belum ada riwayat chat</div>
       </nav>
@@ -80,15 +85,6 @@
             </svg>
           </button>
         </div>
-
-        <button id="sidebarProfileBtn" class="sidebar-profile-action" type="button" aria-label="Buka profil pengguna">
-          Profil
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="21" y2="15"/><line x1="15" y1="8" x2="21" y2="15"/></svg>
-        </button>
-
-        <button id="sidebarClearBtn" class="sidebar-clear-btn" type="button" title="Hapus riwayat percakapan" aria-label="Hapus riwayat percakapan">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
-        </button>
       </div>
     </aside>
 
@@ -97,7 +93,7 @@
 
       <!-- Mobile Top Bar -->
       <header class="app-header-bar">
-        <button id="mobileMenuToggle" class="menu-btn" aria-label="Buka menu" type="button">
+        <button id="mobileMenuToggle" class="menu-btn" aria-label="Buka menu" aria-expanded="false" aria-controls="appSidebar" type="button">
           <span class="menu-line"></span>
           <span class="menu-line"></span>
           <span class="menu-line"></span>
@@ -130,9 +126,10 @@
 
       <!-- Tab Pills -->
       <div class="tab-pills-container">
-        <div class="tab-pills">
-          <button id="modeChat" class="tab-pill active" type="button">Chat</button>
-          <button id="modeImage" class="tab-pill" type="button">Generate Image</button>
+        <div class="segmented-control" role="tablist">
+          <button id="modeChat" role="tab" aria-selected="true" aria-controls="tabChat" type="button">Chat</button>
+          <button id="modeImage" role="tab" aria-selected="false" aria-controls="tabImage" type="button">Generate Image</button>
+          <div class="segmented-thumb"></div>
         </div>
       </div>
 
@@ -189,25 +186,31 @@
       <!-- ===== Image Tab Panel ===== -->
       <section id="tabImage" class="tab-panel hidden">
         <div class="image-composer">
-          <textarea id="imagePrompt" rows="2" placeholder="Describe the image you want..." class="image-prompt-input" maxlength="1000"></textarea>
+          <textarea id="imagePrompt" rows="2" placeholder="Deskripsikan gambar yang ingin Anda buat..." class="image-prompt-input" maxlength="1000"></textarea>
           <div class="image-options">
-            <div class="chip-group">
+            <div class="style-grid">
               <span class="chip-group-label">Gaya</span>
-              <button class="chip active" data-style="realistis" type="button">Realistis</button>
-              <button class="chip" data-style="anime" type="button">Anime</button>
-              <button class="chip" data-style="3d" type="button">3D</button>
-              <button class="chip" data-style="ilustrasi" type="button">Ilustrasi</button>
+              <div class="style-chips">
+                <button class="style-chip active" data-style="realistis" type="button" aria-label="Gaya Realistis">🖼️ Realistis</button>
+                <button class="style-chip" data-style="anime" type="button" aria-label="Gaya Anime">📺 Anime</button>
+                <button class="style-chip" data-style="3d" type="button" aria-label="Gaya 3D">🎮 3D</button>
+                <button class="style-chip" data-style="ilustrasi" type="button" aria-label="Gaya Ilustrasi">🎨 Ilustrasi</button>
+              </div>
             </div>
-            <div class="chip-group">
+            <div class="ratio-grid">
               <span class="chip-group-label">Rasio</span>
-              <button class="chip active" data-ratio="1:1" type="button">1:1</button>
-              <button class="chip" data-ratio="16:9" type="button">16:9</button>
-              <button class="chip" data-ratio="9:16" type="button">9:16</button>
+              <div class="ratio-chips">
+                <button class="ratio-chip active" data-ratio="1:1" type="button" aria-label="Rasio 1:1 Kotak">▭ 1:1</button>
+                <button class="ratio-chip" data-ratio="16:9" type="button" aria-label="Rasio 16:9 Lanskap">▭ 16:9</button>
+                <button class="ratio-chip" data-ratio="9:16" type="button" aria-label="Rasio 9:16 Potret">▭ 9:16</button>
+              </div>
             </div>
           </div>
           <button id="imageSendBtn" class="btn-image-send" type="button" aria-label="Buat Gambar">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-            Buat Gambar
+            <span class="btn-image-text">Buat Gambar</span>
+            <span class="btn-image-spinner is-hidden" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6a6 6 0 016 6h6a6 6 0 01-6-6"/></svg>
+            </span>
           </button>
         </div>
 
@@ -218,7 +221,12 @@
         </div>
 
         <div id="imageResults" class="image-grid"></div>
-
+        <div id="imageEmpty" class="image-empty hidden">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3;">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+          <p style="color:var(--color-text-muted); font-size:var(--text-sm);">Hasil gambar akan muncul di sini</p>
+        </div>
         <div id="imageError" class="image-error hidden">
           <span id="imageErrorText"></span>
         </div>
@@ -259,6 +267,17 @@
     <div class="history-list is-hidden" id="historyList"></div>
     <div class="history-empty" id="historyEmpty">
       <p>Belum ada riwayat chat</p>
+    </div>
+  </div>
+
+  <!-- Konfirmasi hapus riwayat -->
+  <div class="history-delete-confirm" id="historyDeleteConfirm">
+    <div class="history-delete-confirm-card">
+      <p>Hapus semua riwayat chat?</p>
+      <div class="history-delete-confirm-actions">
+        <button id="btnDeleteCancel" class="btn-delete-cancel" type="button">Batal</button>
+        <button id="btnDeleteConfirm" class="btn-delete-confirm" type="button">Hapus</button>
+      </div>
     </div>
   </div>
 

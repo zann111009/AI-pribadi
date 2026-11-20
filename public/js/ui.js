@@ -412,6 +412,7 @@ class ChatUI {
     }
 
     this.els.imageResults.appendChild(div);
+    this.hideImageEmpty();
     if (this.els.imageSkeleton) this.els.imageSkeleton.classList.add('hidden');
     if (this.els.imageError) this.els.imageError.classList.add('hidden');
   }
@@ -420,9 +421,21 @@ class ChatUI {
     if (this.els.imageResults) this.els.imageResults.innerHTML = '';
   }
 
+  showImageEmpty() {
+    if (this.els.imageEmpty) this.els.imageEmpty.classList.remove('hidden');
+    if (this.els.imageResults) this.els.imageResults.classList.add('hidden');
+  }
+
+  hideImageEmpty() {
+    if (this.els.imageEmpty) this.els.imageEmpty.classList.add('hidden');
+    if (this.els.imageResults) this.els.imageResults.classList.remove('hidden');
+  }
+
   showImageSkeleton() {
     if (this.els.imageSkeleton) this.els.imageSkeleton.classList.remove('hidden');
     if (this.els.imageError) this.els.imageError.classList.add('hidden');
+    if (this.els.imageEmpty) this.els.imageEmpty.classList.add('hidden');
+    if (this.els.imageResults) this.els.imageResults.classList.add('hidden');
     this.clearImageResults();
   }
 
@@ -437,6 +450,8 @@ class ChatUI {
       this.els.imageError.classList.toggle('image-error-ratelimit', Boolean(isRateLimit));
     }
     this.hideImageSkeleton();
+    if (this.els.imageEmpty) this.els.imageEmpty.classList.add('hidden');
+    if (this.els.imageResults) this.els.imageResults.classList.add('hidden');
   }
 
   hideImageError() {

@@ -145,7 +145,7 @@ class ProfileManager {
     this.setStatus('');
     this.els.profileModal.classList.add('open');
     this.els.profileOverlay.classList.add('open');
-    document.body.classList.add('body-menu-open');
+    document.body.classList.add('menu-open');
     if (this.els.profileUsername) this.els.profileUsername.focus();
     this._trapFocus();
   }
@@ -154,7 +154,7 @@ class ProfileManager {
     if (!this.els.profileModal) return;
     this.els.profileModal.classList.remove('open');
     this.els.profileOverlay.classList.remove('open');
-    document.body.classList.remove('body-menu-open');
+    document.body.classList.remove('menu-open');
     this._untrapFocus();
   }
 
