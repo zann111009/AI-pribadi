@@ -121,6 +121,9 @@ class ChatUI {
       top: this.els.messagesArea.scrollHeight,
       behavior: 'smooth',
     });
+    if (typeof window.updateScrollBtnVisibility === 'function') {
+      window.updateScrollBtnVisibility();
+    }
   }
 
   appendUserMessage(text) {
@@ -284,6 +287,10 @@ class ChatUI {
   }
 
   appendWelcome() {
+    const profile = window.profileManager;
+    const username = profile ? profile.getUserName() : '';
+    const photo = profile ? profile.getPhoto() : '';
+
     const div = document.createElement('div');
     div.className = 'message-row welcome-row';
     div.innerHTML = `
@@ -293,9 +300,20 @@ class ChatUI {
         </svg>
       </div>
       <div class="bubble-ai">
-        <p class="bubble-text">Halo! Saya <strong>Zann-AI</strong>. Tanyakan apa saja, saya siap membantu Anda.</p>
+        <p class="bubble-text">Halo${username ? ', ' + username : ''}! Saya <strong>Zann-AI</strong>. Tanyakan apa saja, saya siap membantu Anda.</p>
       </div>
     `;
+
+    if (photo) {
+      const avatar = div.querySelector('.avatar-ai');
+      if (avatar) {
+        avatar.style.backgroundImage = `url("${photo}")`;
+        avatar.classList.add('has-photo');
+        avatar.style.backgroundSize = 'cover';
+        avatar.style.backgroundPosition = 'center';
+      }
+    }
+
     this.els.messagesArea.appendChild(div);
     this.scrollToBottom();
     this.showPromptSuggestions();

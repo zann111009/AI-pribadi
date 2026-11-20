@@ -147,6 +147,7 @@ class ProfileManager {
     this.els.profileOverlay.classList.add('open');
     document.body.classList.add('body-menu-open');
     if (this.els.profileUsername) this.els.profileUsername.focus();
+    this._trapFocus();
   }
 
   close() {
@@ -154,6 +155,46 @@ class ProfileManager {
     this.els.profileModal.classList.remove('open');
     this.els.profileOverlay.classList.remove('open');
     document.body.classList.remove('body-menu-open');
+    this._untrapFocus();
+  }
+
+  _getFocusableElements() {
+    if (!this.els.profileModal) return [];
+    return Array.from(
+      this.els.profileModal.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      )
+    ).filter((el) => !el.hasAttribute('disabled') && el.getAttribute('tabindex') !== '-1');
+  }
+
+  _trapFocus() {
+    const focusable = this._getFocusableElements();
+    if (focusable.length === 0) return;
+    this._firstFocusable = focusable[0];
+    this._lastFocusable = focusable[focusable.length - 1];
+
+    this._keydownHandler = (e) => {
+      if (e.key !== 'Tab') return;
+      if (e.shiftKey) {
+        if (document.activeElement === this._firstFocusable) {
+          e.preventDefault();
+          this._lastFocusable.focus();
+        }
+      } else {
+        if (document.activeElement === this._lastFocusable) {
+          e.preventDefault();
+          this._firstFocusable.focus();
+        }
+      }
+    };
+    document.addEventListener('keydown', this._keydownHandler);
+  }
+
+  _untrapFocus() {
+    if (this._keydownHandler) {
+      document.removeEventListener('keydown', this._keydownHandler);
+      this._keydownHandler = null;
+    }
   }
 
   commit() {

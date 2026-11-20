@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     tabChat: document.getElementById('tabChat'),
     tabImage: document.getElementById('tabImage'),
     inputDock: document.querySelector('.input-dock'),
+    scrollToBottomBtn: document.getElementById('scrollToBottomBtn'),
   };
 
   const ui = new ChatUI(elements);
@@ -81,6 +82,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && menuToggle.classList.contains('open')) closeDrawer();
+    });
+  }
+
+  /* ===== Scroll to Bottom Button ===== */
+  function updateScrollBtnVisibility() {
+    if (!elements.scrollToBottomBtn || !elements.messagesArea) return;
+    const isNearBottom =
+      elements.messagesArea.scrollHeight - elements.messagesArea.scrollTop - elements.messagesArea.clientHeight < 100;
+    elements.scrollToBottomBtn.classList.toggle('visible', !isNearBottom);
+  }
+
+  if (elements.scrollToBottomBtn) {
+    elements.scrollToBottomBtn.addEventListener('click', () => {
+      ui.scrollToBottom();
+      elements.scrollToBottomBtn.classList.remove('visible');
+    });
+    elements.messagesArea.addEventListener('scroll', updateScrollBtnVisibility);
+  }
+
+  /* ===== Sidebar Collapse (Desktop) ===== */
+  const sidebarCollapseToggle = document.getElementById('sidebarCollapseToggle');
+
+  if (sidebarCollapseToggle && appSidebar) {
+    sidebarCollapseToggle.addEventListener('click', () => {
+      const isCollapsed = appSidebar.classList.toggle('collapsed');
+      sidebarCollapseToggle.setAttribute('aria-expanded', String(!isCollapsed));
+      sidebarCollapseToggle.setAttribute('aria-label', isCollapsed ? 'Perlebar sidebar' : 'Kecilkan sidebar');
     });
   }
 
