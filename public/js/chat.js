@@ -34,6 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
   let selectedStyle = 'realistis';
   let selectedRatio = '1:1';
   let imageCooldownUntil = 0;
+  let draftDebounceTimer = null;
+
+  const DRAFT_KEY = 'zann.chatDraft';
+  const IMAGE_DRAFT_KEY = 'zann.imageDraft';
+  const TAB_MODE_KEY = 'zann.tabMode';
 
   // TODO: Backend /api/generate-image hanya menerima { prompt } (lihat src/routes/chat.js:74).
   // Chip gaya dan rasio di UI saat ini hanya visual; belum dikirim ke API agar logika generate tidak diubah.
@@ -75,6 +80,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function setMode(mode) {
     currentMode = mode;
+    try {
+      localStorage.setItem(TAB_MODE_KEY, mode);
+    } catch (e) {
+      // abaikan error kuota / mode privat
+    }
 
     if (mode === 'chat') {
       setTabActive('modeChat');
@@ -122,6 +132,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('resize', updateSegmentedThumb);
     updateSegmentedThumb();
+
+    const savedSessionId = historyManager.getActiveSessionId();
+    if (savedSessionId && historyManager.history.find(s => s.id === savedSessionId)) {
+      historyManager.loadSession(savedSessionId);
+    }
+
+    try {
+      const savedTab = localStorage.getItem(TAB_MODE_KEY);
+      if (savedTab === 'image') {
+        setMode('image');
+      } else {
+        setMode('chat');
+      }
+    } catch (e) {
+      setMode('chat');
+    }
+
+    try {
+      const savedDraft = localStorage.getItem(DRAFT_KEY);
+      if (savedDraft) {
+        elements.messageInput.value = savedDraft;
+        ui.updateSendBtn(savedDraft.trim().length > 0);
+        autoResize(elements.messageInput);
+      }
+    } catch (e) {
+      // abaikan error kuota / mode privat
+    }
+
+    try {
+      const savedImageDraft = localStorage.getItem(IMAGE_DRAFT_KEY);
+      if (savedImageDraft) {
+        elements.imagePrompt.value = savedImageDraft;
+        elements.imageSendBtn.disabled = savedImageDraft.trim().length === 0;
+        autoResize(elements.imagePrompt);
+      }
+    } catch (e) {
+      // abaikan error kuota / mode privat
+    }
   }
   const menuToggle = document.getElementById('mobileMenuToggle');
   const appSidebar = document.getElementById('appSidebar');
@@ -221,6 +269,15 @@ document.addEventListener('DOMContentLoaded', () => {
       ui.showPromptSuggestions();
     }
     autoResize(elements.messageInput);
+
+    clearTimeout(draftDebounceTimer);
+    draftDebounceTimer = setTimeout(() => {
+      try {
+        localStorage.setItem(DRAFT_KEY, elements.messageInput.value);
+      } catch (e) {
+        // abaikan error kuota / mode privat
+      }
+    }, 300);
   });
 
   elements.messageInput.addEventListener('keydown', (e) => {
@@ -382,6 +439,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const hasText = elements.imagePrompt.value.trim().length > 0;
     elements.imageSendBtn.disabled = !hasText;
     autoResize(elements.imagePrompt);
+
+    try {
+      localStorage.setItem(IMAGE_DRAFT_KEY, elements.imagePrompt.value);
+    } catch (e) {
+      // abaikan error kuota / mode privat
+    }
   });
 
   elements.imagePrompt.addEventListener('keydown', (e) => {
@@ -421,6 +484,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     ui.hideWelcome();
     ui.clearInput();
+    try {
+      localStorage.removeItem(DRAFT_KEY);
+    } catch (e) {
+      // abaikan error kuota / mode privat
+    }
     ui.appendUserMessage(text);
     currentMessages.push({ role: 'user', content: text });
     ui.showClearBtn();
@@ -609,6 +677,15 @@ document.addEventListener('DOMContentLoaded', () => {
     textarea.style.height = 'auto';
     textarea.style.height = Math.min(textarea.scrollHeight, 128) + 'px';
   }
+
+  /* ===== Copy Code (Event Delegation) ===== */
+  elements.messagesArea.addEventListener('click', (e) => {
+    const btn = e.target.closest('.copy-btn');
+    if (!btn) return;
+    const pre = btn.closest('.code-block')?.querySelector('pre code');
+    if (!pre) return;
+    ui.copyCode(pre);
+  });
 
   window.handleSend = handleSend;
 });

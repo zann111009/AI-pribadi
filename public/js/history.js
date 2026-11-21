@@ -1,4 +1,5 @@
 const HISTORY_KEY = 'ai-pribadi-history';
+const ACTIVE_SESSION_KEY = 'zann.activeChatId';
 const HISTORY_TITLE_MAX = 60;
 
 class HistoryManager {
@@ -117,6 +118,7 @@ class HistoryManager {
           updatedAt: now,
         };
         this.save();
+        this.saveActiveSession(this.currentSessionId);
         this.render();
         return;
       }
@@ -131,6 +133,7 @@ class HistoryManager {
       updatedAt: now,
     });
     this.currentSessionId = id;
+    this.saveActiveSession(id);
     this.save();
     this.render();
   }
@@ -146,6 +149,7 @@ class HistoryManager {
     if (!session) return;
 
     this.currentSessionId = id;
+    this.saveActiveSession(id);
 
     this.ui.els.messagesArea.innerHTML = '';
     this.ui.hideWelcome();
@@ -173,6 +177,7 @@ class HistoryManager {
     if (removed) this.cleanupImages(removed.messages);
     if (this.currentSessionId === id) {
       this.currentSessionId = null;
+      this.saveActiveSession(null);
       this.ui.clearSession();
       if (this.onSessionLoad) this.onSessionLoad([]);
     }
@@ -182,6 +187,27 @@ class HistoryManager {
 
   resetCurrent() {
     this.currentSessionId = null;
+    this.saveActiveSession(null);
+  }
+
+  saveActiveSession(id) {
+    try {
+      if (id) {
+        localStorage.setItem(ACTIVE_SESSION_KEY, id);
+      } else {
+        localStorage.removeItem(ACTIVE_SESSION_KEY);
+      }
+    } catch (e) {
+      // abaikan error kuota / mode privat
+    }
+  }
+
+  getActiveSessionId() {
+    try {
+      return localStorage.getItem(ACTIVE_SESSION_KEY);
+    } catch (e) {
+      return null;
+    }
   }
 
   // Hapus gambar yang tersimpan di server saat entri riwayat dihapus.
