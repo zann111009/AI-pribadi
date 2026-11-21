@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
+  let elements;
   try {
-    const elements = {
+    elements = {
     chatForm: document.getElementById('chatForm'),
     messageInput: document.getElementById('messageInput'),
     sendBtn: document.getElementById('sendBtn'),
