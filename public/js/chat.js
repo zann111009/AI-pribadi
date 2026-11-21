@@ -134,8 +134,12 @@ document.addEventListener('DOMContentLoaded', () => {
     updateSegmentedThumb();
 
     const savedSessionId = historyManager.getActiveSessionId();
-    if (savedSessionId && historyManager.history.find(s => s.id === savedSessionId)) {
-      historyManager.loadSession(savedSessionId);
+    try {
+      if (savedSessionId && historyManager.history.find(s => s.id === savedSessionId)) {
+        historyManager.loadSession(savedSessionId);
+      }
+    } catch (e) {
+      console.error('[Session] Gagal memulihkan sesi:', e);
     }
 
     try {
