@@ -122,11 +122,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('resize', updateSegmentedThumb);
     updateSegmentedThumb();
-    setMode('chat');
   }
   const menuToggle = document.getElementById('mobileMenuToggle');
   const appSidebar = document.getElementById('appSidebar');
   const headerOverlay = document.getElementById('headerOverlay');
+
+  setMode('chat');
 
   function closeDrawer() {
     if (!menuToggle || !appSidebar || !headerOverlay) return;
