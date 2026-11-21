@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const elements = {
+  try {
+    const elements = {
     chatForm: document.getElementById('chatForm'),
     messageInput: document.getElementById('messageInput'),
     sendBtn: document.getElementById('sendBtn'),
@@ -692,4 +693,12 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   window.handleSend = handleSend;
-});
+} catch (e) {
+  console.error('[DOMContentLoaded] Fatal error:', e);
+  if (elements && elements.chatForm) {
+    elements.chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await handleSend();
+    });
+  }
+}});
