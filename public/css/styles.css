@@ -453,6 +453,7 @@ img {
 }
 
 .sidebar-collapse-toggle {
+  display: none !important;
   position: absolute;
   top: var(--space-3);
   right: -10px;
@@ -782,24 +783,26 @@ img {
   color: var(--color-text);
 }
 
+.sidebar-profile {
+  margin-top: auto;
+  padding: var(--space-3);
+  padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
 /* Remove unused sidebar profile action & clear button styles */
 .sidebar-profile-action,
 .sidebar-clear-btn {
   display: none !important;
-}
-  flex: 0 0 auto;
-  padding: var(--space-4) var(--space-3);
-  padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
-  border-top: 1px solid var(--color-border);
-  background: var(--color-surface);
 }
 
 .profile-card {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+  border-radius: 0.875rem;
   border: 1px solid var(--color-border);
   background: var(--color-surface-alt);
   cursor: pointer;
@@ -812,8 +815,8 @@ img {
 }
 
 .profile-avatar-wrapper {
-  width: 3rem;
-  height: 3rem;
+  width: 40px;
+  height: 40px;
   flex-shrink: 0;
   border-radius: var(--radius-full);
   overflow: hidden;
@@ -832,16 +835,22 @@ img {
 }
 
 .sidebar-profile-icon {
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 20px;
+  height: 20px;
   color: var(--color-text-muted);
 }
 
 .profile-info {
+  flex: 1;
   min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
 }
 
 .sidebar-profile-name {
+  flex: 1;
+  min-width: 0;
   font-size: var(--text-sm);
   font-weight: var(--fw-semibold);
   color: var(--color-text);
@@ -860,11 +869,10 @@ img {
 }
 
 .sidebar-theme-toggle {
-  margin-left: auto;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   background: transparent;
   color: var(--color-text-muted);
   cursor: pointer;
@@ -1135,10 +1143,8 @@ body.menu-open {
   border: none;
   background: transparent;
   color: var(--color-text-muted);
-  font-size: var(--text-sm);
-  font-weight: var(--fw-semibold);
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 .segmented-control button:hover {
@@ -1147,6 +1153,8 @@ body.menu-open {
 
 .segmented-control button[aria-selected="true"] {
   color: var(--color-text-inverse);
+  background: var(--color-accent-gradient);
+  box-shadow: var(--shadow-md);
 }
 
 .segmented-thumb {
@@ -1162,6 +1170,7 @@ body.menu-open {
   box-shadow: var(--shadow-md);
   transition: transform 200ms ease, width 200ms ease;
   will-change: transform, width;
+  display: none;
 }
 
 /* ---------- Tab Panels ---------- */

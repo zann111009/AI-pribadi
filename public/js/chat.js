@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     typingIndicator: document.getElementById('typingIndicator'),
     errorToast: document.getElementById('errorToast'),
     errorText: document.getElementById('errorText'),
-    clearSessionBtn: document.getElementById('sidebarClearBtn'),
+    clearSessionBtn: document.getElementById('sidebarClearHistoryBtn'),
     imagePrompt: document.getElementById('imagePrompt'),
     imageSendBtn: document.getElementById('imageSendBtn'),
     imageResults: document.getElementById('imageResults'),
@@ -66,7 +66,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const buttons = segmentedControl ? segmentedControl.querySelectorAll('button') : [];
     buttons.forEach((btn) => {
       const isActive = btn.id === activeId;
+      btn.classList.toggle('active', isActive);
       btn.setAttribute('aria-selected', String(isActive));
+      btn.tabIndex = isActive ? 0 : -1;
     });
     updateSegmentedThumb();
   }
@@ -120,6 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('resize', updateSegmentedThumb);
     updateSegmentedThumb();
+    setMode('chat');
   }
   const menuToggle = document.getElementById('mobileMenuToggle');
   const appSidebar = document.getElementById('appSidebar');
@@ -194,34 +197,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ===== Tab Switching ===== */
 
-  function setMode(mode) {
-    currentMode = mode;
-
-    if (mode === 'chat') {
-      modeChat.classList.add('active');
-      modeImage.classList.remove('active');
-      elements.tabChat.classList.add('active');
-      elements.tabChat.classList.remove('hidden');
-      elements.tabImage.classList.remove('active');
-      elements.tabImage.classList.add('hidden');
-      elements.inputDock.style.display = 'block';
-      elements.messageInput.placeholder = 'Ketik pesan Anda...';
-      if (elements.messageInput.value.trim() === '') {
-        ui.showPromptSuggestions();
-      }
-    } else {
-      modeImage.classList.add('active');
-      modeChat.classList.remove('active');
-      elements.tabImage.classList.add('active');
-      elements.tabImage.classList.remove('hidden');
-      elements.tabChat.classList.remove('active');
-      elements.tabChat.classList.add('hidden');
-      elements.inputDock.style.display = 'none';
-      elements.imagePrompt.placeholder = 'Describe the image you want...';
-      ui.hidePromptSuggestions();
-    }
-  closeDrawer();
-}
 
   /* ===== Prompt Suggestions ===== */
 
@@ -274,8 +249,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  elements.clearSessionBtn.addEventListener('click', () => {
-    startNewChat();
+  elements.clearSessionBtn?.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    if (historyManager.history.length === 0) return;
+    await showDeleteConfirm();
+    const confirmed = await new Promise((resolve) => {
+      deleteConfirmResolve = resolve;
+      if (btnDeleteConfirm) btnDeleteConfirm.onclick = () => resolve(true);
+      if (btnDeleteCancel) btnDeleteCancel.onclick = () => resolve(false);
+    });
+    hideDeleteConfirm();
+    if (confirmed) {
+      historyManager.history = [];
+      historyManager.save();
+      historyManager.render();
+      if (historyManager.currentSessionId) {
+        historyManager.currentSessionId = null;
+        ui.clearSession();
+      }
+    }
   });
 
   const sidebarClearHistoryBtn = document.getElementById('sidebarClearHistoryBtn');
@@ -337,11 +329,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ===== Profile / Theme (mobile top bar) ===== */
 
-  const sidebarProfileBtn = document.getElementById('sidebarProfileBtn');
+  const sidebarProfileTrigger = document.getElementById('sidebarProfileTrigger');
   const sidebarThemeToggle = document.getElementById('sidebarThemeToggle');
   const mobileThemeToggle = document.getElementById('mobileThemeToggle');
   const mobileHistoryToggle = document.getElementById('mobileHistoryToggle');
   const mobileProfileToggle = document.getElementById('mobileProfileToggle');
+
+  if (sidebarProfileTrigger) {
+    sidebarProfileTrigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (window.profileManager) window.profileManager.open();
+    });
+    sidebarProfileTrigger.addEventListener('keydown', (e) => {
+      if (e.target !== sidebarProfileTrigger) return;
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        if (window.profileManager) window.profileManager.open();
+      }
+    });
+  }
 
   if (mobileHistoryToggle) {
     mobileHistoryToggle.addEventListener('click', (e) => {

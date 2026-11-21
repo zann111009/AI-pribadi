@@ -9,7 +9,10 @@ class ThemeManager {
     this.current = document.documentElement.getAttribute('data-theme') || 'light';
 
     this.toggleBtns.forEach((btn) => {
-      btn.addEventListener('click', () => this.toggle());
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggle();
+      });
     });
 
     if (this.media.addEventListener) {
