@@ -119,6 +119,42 @@ document.addEventListener('DOMContentLoaded', () => {
     closeDrawer();
   }
 
+  /* ===== Segmented Control: click + keyboard ===== */
+  if (segmentedControl) {
+    segmentedControl.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn || !btn.id) return;
+      setMode(btn.id === 'modeChat' ? 'chat' : 'image');
+    });
+
+    segmentedControl.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        const buttons = Array.from(segmentedControl.querySelectorAll('button'));
+        const current = buttons.findIndex((b) => b.id === (currentMode === 'chat' ? 'modeChat' : 'modeImage'));
+        let next = current;
+        if (e.key === 'ArrowRight') next = (current + 1) % buttons.length;
+        if (e.key === 'ArrowLeft') next = (current - 1 + buttons.length) % buttons.length;
+        setMode(buttons[next].id === 'modeChat' ? 'chat' : 'image');
+        buttons[next].focus();
+      }
+    });
+
+    window.addEventListener('resize', updateSegmentedThumb);
+    updateSegmentedThumb();
+  }
+
+  /* Direct click handlers as fallback */
+  if (modeChat) {
+    modeChat.addEventListener('click', () => setMode('chat'));
+  }
+  if (modeImage) {
+    modeImage.addEventListener('click', () => setMode('image'));
+  }
+
+  // Initialize mode
+  setMode('chat');
+
   const menuToggle = document.getElementById('mobileMenuToggle');
   const appSidebar = document.getElementById('appSidebar');
   const headerOverlay = document.getElementById('headerOverlay');
