@@ -3,33 +3,37 @@ document.addEventListener('DOMContentLoaded', () => {
   try {
     elements = {
       chatForm: document.getElementById('chatForm'),
-    messageInput: document.getElementById('messageInput'),
-    sendBtn: document.getElementById('sendBtn'),
-    messagesArea: document.getElementById('messagesArea'),
-    welcomeMessage: document.getElementById('welcomeMessage'),
-    typingIndicator: document.getElementById('typingIndicator'),
-    errorToast: document.getElementById('errorToast'),
-    errorText: document.getElementById('errorText'),
-    clearSessionBtn: document.getElementById('sidebarClearHistoryBtn'),
-    imagePrompt: document.getElementById('imagePrompt'),
-    imageSendBtn: document.getElementById('imageSendBtn'),
-    imageResults: document.getElementById('imageResults'),
-    imageSkeleton: document.getElementById('imageSkeleton'),
-    imageError: document.getElementById('imageError'),
-    imageErrorText: document.getElementById('imageErrorText'),
-    imageEmpty: document.getElementById('imageEmpty'),
-    promptSuggestions: document.getElementById('promptSuggestions'),
-    tabChat: document.getElementById('tabChat'),
-    tabImage: document.getElementById('tabImage'),
-    inputDock: document.querySelector('.input-dock'),
-    scrollToBottomBtn: document.getElementById('scrollToBottomBtn'),
-  };
-
-  /* ===== Chat Form Submit (early, so it always works) ===== */
-  elements.chatForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    await handleSend();
-  });
+      messageInput: document.getElementById('messageInput'),
+      sendBtn: document.getElementById('sendBtn'),
+      messagesArea: document.getElementById('messagesArea'),
+      welcomeMessage: document.getElementById('welcomeMessage'),
+      typingIndicator: document.getElementById('typingIndicator'),
+      errorToast: document.getElementById('errorToast'),
+      errorText: document.getElementById('errorText'),
+      clearSessionBtn: document.getElementById('sidebarClearHistoryBtn'),
+      imagePrompt: document.getElementById('imagePrompt'),
+      imageSendBtn: document.getElementById('imageSendBtn'),
+      imageResults: document.getElementById('imageResults'),
+      imageSkeleton: document.getElementById('imageSkeleton'),
+      imageError: document.getElementById('imageError'),
+      imageErrorText: document.getElementById('imageErrorText'),
+      imageEmpty: document.getElementById('imageEmpty'),
+      promptSuggestions: document.getElementById('promptSuggestions'),
+      tabChat: document.getElementById('tabChat'),
+      tabImage: document.getElementById('tabImage'),
+      inputDock: document.querySelector('.input-dock'),
+      scrollToBottomBtn: document.getElementById('scrollToBottomBtn'),
+    };
+  } catch (e) {
+    console.error('[DOMContentLoaded] Fatal error:', e);
+    if (elements && elements.chatForm) {
+      elements.chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (typeof handleSend === 'function') await handleSend();
+      });
+    }
+    return;
+  }
 
   const ui = new ChatUI(elements);
   const modeChat = document.getElementById('modeChat');
@@ -47,9 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const DRAFT_KEY = 'zann.chatDraft';
   const IMAGE_DRAFT_KEY = 'zann.imageDraft';
   const TAB_MODE_KEY = 'zann.tabMode';
-
-  // TODO: Backend /api/generate-image hanya menerima { prompt } (lihat src/routes/chat.js:74).
-  // Chip gaya dan rasio di UI saat ini hanya visual; belum dikirim ke API agar logika generate tidak diubah.
 
   const historyManager = new HistoryManager(ui);
   historyManager.onSessionLoad = (messages) => {
@@ -71,8 +72,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!activeBtn) return;
     const rect = activeBtn.getBoundingClientRect();
     const parentRect = segmentedControl.getBoundingClientRect();
-    segmentedThumb.style.transform = `translateX(${rect.left - parentRect.left}px)`;
-    segmentedThumb.style.width = `${rect.width}px`;
+    segmentedThumb.style.transform = 'translateX(' + (rect.left - parentRect.left) + 'px)';
+    segmentedThumb.style.width = rect.width + 'px';
   }
 
   function setTabActive(activeId) {
@@ -118,76 +119,9 @@ document.addEventListener('DOMContentLoaded', () => {
     closeDrawer();
   }
 
-  if (segmentedControl) {
-    segmentedControl.addEventListener('click', (e) => {
-      const btn = e.target.closest('button');
-      if (!btn || !btn.id) return;
-      setMode(btn.id === 'modeChat' ? 'chat' : 'image');
-    });
-
-    segmentedControl.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-        e.preventDefault();
-        const buttons = Array.from(segmentedControl.querySelectorAll('button'));
-        const current = buttons.findIndex((b) => b.id === (currentMode === 'chat' ? 'modeChat' : 'modeImage'));
-        let next = current;
-        if (e.key === 'ArrowRight') next = (current + 1) % buttons.length;
-        if (e.key === 'ArrowLeft') next = (current - 1 + buttons.length) % buttons.length;
-        setMode(buttons[next].id === 'modeChat' ? 'chat' : 'image');
-        buttons[next].focus();
-      }
-    });
-
-    window.addEventListener('resize', updateSegmentedThumb);
-    updateSegmentedThumb();
-
-    const savedSessionId = historyManager.getActiveSessionId();
-    try {
-      if (savedSessionId && historyManager.history.find(s => s.id === savedSessionId)) {
-        historyManager.loadSession(savedSessionId);
-      }
-    } catch (e) {
-      console.error('[Session] Gagal memulihkan sesi:', e);
-    }
-
-    try {
-      const savedTab = localStorage.getItem(TAB_MODE_KEY);
-      if (savedTab === 'image') {
-        setMode('image');
-      } else {
-        setMode('chat');
-      }
-    } catch (e) {
-      setMode('chat');
-    }
-
-    try {
-      const savedDraft = localStorage.getItem(DRAFT_KEY);
-      if (savedDraft) {
-        elements.messageInput.value = savedDraft;
-        ui.updateSendBtn(savedDraft.trim().length > 0);
-        autoResize(elements.messageInput);
-      }
-    } catch (e) {
-      // abaikan error kuota / mode privat
-    }
-
-    try {
-      const savedImageDraft = localStorage.getItem(IMAGE_DRAFT_KEY);
-      if (savedImageDraft) {
-        elements.imagePrompt.value = savedImageDraft;
-        elements.imageSendBtn.disabled = savedImageDraft.trim().length === 0;
-        autoResize(elements.imagePrompt);
-      }
-    } catch (e) {
-      // abaikan error kuota / mode privat
-    }
-  }
   const menuToggle = document.getElementById('mobileMenuToggle');
   const appSidebar = document.getElementById('appSidebar');
   const headerOverlay = document.getElementById('headerOverlay');
-
-  setMode('chat');
 
   function closeDrawer() {
     if (!menuToggle || !appSidebar || !headerOverlay) return;
@@ -209,7 +143,6 @@ document.addEventListener('DOMContentLoaded', () => {
       headerOverlay.classList.toggle('open', open);
       document.body.classList.toggle('menu-open', open);
       if (open) {
-        // Fokus pindah ke first focusable di drawer
         const firstFocusable = appSidebar.querySelector('button, [href], input, [tabindex]:not([tabindex="-1"])');
         if (firstFocusable) firstFocusable.focus();
       } else {
@@ -256,51 +189,50 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* ===== Tab Switching ===== */
-
-
   /* ===== Prompt Suggestions ===== */
-
-  elements.promptSuggestions.querySelectorAll('.suggestion-chip').forEach((chip) => {
-    chip.addEventListener('click', () => {
-      const prompt = chip.getAttribute('data-prompt');
-      if (!prompt) return;
-      elements.messageInput.value = prompt;
-      ui.updateSendBtn(true);
-      setMode('chat');
-      elements.messageInput.focus();
+  if (elements.promptSuggestions) {
+    elements.promptSuggestions.querySelectorAll('.suggestion-chip').forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const prompt = chip.getAttribute('data-prompt');
+        if (!prompt) return;
+        elements.messageInput.value = prompt;
+        ui.updateSendBtn(true);
+        setMode('chat');
+        elements.messageInput.focus();
+      });
     });
-  });
+  }
 
-  elements.messageInput.addEventListener('input', () => {
-    const hasText = elements.messageInput.value.trim().length > 0;
-    ui.updateSendBtn(hasText);
-    if (hasText) {
-      ui.hidePromptSuggestions();
-    } else {
-      ui.showPromptSuggestions();
-    }
-    autoResize(elements.messageInput);
-
-    clearTimeout(draftDebounceTimer);
-    draftDebounceTimer = setTimeout(() => {
-      try {
-        localStorage.setItem(DRAFT_KEY, elements.messageInput.value);
-      } catch (e) {
-        // abaikan error kuota / mode privat
+  if (elements.messageInput) {
+    elements.messageInput.addEventListener('input', () => {
+      const hasText = elements.messageInput.value.trim().length > 0;
+      ui.updateSendBtn(hasText);
+      if (hasText) {
+        ui.hidePromptSuggestions();
+      } else {
+        ui.showPromptSuggestions();
       }
-    }, 300);
-  });
+      autoResize(elements.messageInput);
 
-  elements.messageInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  });
+      clearTimeout(draftDebounceTimer);
+      draftDebounceTimer = setTimeout(() => {
+        try {
+          localStorage.setItem(DRAFT_KEY, elements.messageInput.value);
+        } catch (e) {
+          // abaikan error kuota / mode privat
+        }
+      }, 300);
+    });
+
+    elements.messageInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSend();
+      }
+    });
+  }
 
   /* ===== New Chat ===== */
-
   function startNewChat() {
     ui.clearSession();
     currentMessages = [];
@@ -398,7 +330,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ===== Profile / Theme (mobile top bar) ===== */
-
   const sidebarProfileTrigger = document.getElementById('sidebarProfileTrigger');
   const sidebarThemeToggle = document.getElementById('sidebarThemeToggle');
   const mobileThemeToggle = document.getElementById('mobileThemeToggle');
@@ -434,37 +365,45 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ===== Chat Form Submit ===== */
+  if (elements.chatForm) {
+    elements.chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await handleSend();
+    });
+  }
 
   /* ===== Image Generation ===== */
+  if (elements.imageSendBtn) {
+    elements.imageSendBtn.addEventListener('click', async () => {
+      if (currentMode !== 'image') setMode('image');
+      await generateImage(elements.imagePrompt.value.trim());
+    });
+  }
 
-  elements.imageSendBtn.addEventListener('click', async () => {
-    if (currentMode !== 'image') setMode('image');
-    await generateImage(elements.imagePrompt.value.trim());
-  });
+  if (elements.imagePrompt) {
+    elements.imagePrompt.addEventListener('input', () => {
+      const hasText = elements.imagePrompt.value.trim().length > 0;
+      elements.imageSendBtn.disabled = !hasText;
+      autoResize(elements.imagePrompt);
 
-  elements.imagePrompt.addEventListener('input', () => {
-    const hasText = elements.imagePrompt.value.trim().length > 0;
-    elements.imageSendBtn.disabled = !hasText;
-    autoResize(elements.imagePrompt);
-
-    try {
-      localStorage.setItem(IMAGE_DRAFT_KEY, elements.imagePrompt.value);
-    } catch (e) {
-      // abaikan error kuota / mode privat
-    }
-  });
-
-  elements.imagePrompt.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      if (!elements.imageSendBtn.disabled) {
-        generateImage(elements.imagePrompt.value.trim());
+      try {
+        localStorage.setItem(IMAGE_DRAFT_KEY, elements.imagePrompt.value);
+      } catch (e) {
+        // abaikan error kuota / mode privat
       }
-    }
-  });
+    });
+
+    elements.imagePrompt.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        if (!elements.imageSendBtn.disabled) {
+          generateImage(elements.imagePrompt.value.trim());
+        }
+      }
+    });
+  }
 
   /* ===== Chip Selection (Style / Ratio) ===== */
-
   document.querySelectorAll('.style-chip[data-style]').forEach((chip) => {
     chip.addEventListener('click', () => {
       document.querySelectorAll('.style-chip[data-style]').forEach((c) => c.classList.remove('active'));
@@ -482,7 +421,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* ===== handleSend (Chat API) ===== */
-
   async function handleSend() {
     const text = elements.messageInput.value.trim();
     if (!text) return;
@@ -544,10 +482,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     ui.hideTypingIndicator();
     ui.showError('Koneksi gagal. Periksa koneksi internet Anda.');
-  };
+  }
 
   /* ===== generateImage (Image API) ===== */
-
   async function generateImage(prompt) {
     if (!prompt) return;
 
@@ -644,7 +581,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const remaining = Math.ceil((imageCooldownUntil - now) / 1000);
       if (remaining > 0) {
         elements.imageSendBtn.disabled = true;
-        elements.imageSendBtn.textContent = `Tunggu ${remaining} detik`;
+        elements.imageSendBtn.textContent = 'Tunggu ' + remaining + ' detik';
         setTimeout(update, 1000);
       } else {
         elements.imageSendBtn.disabled = elements.imagePrompt.value.trim().length === 0;
@@ -686,21 +623,58 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ===== Copy Code (Event Delegation) ===== */
-  elements.messagesArea.addEventListener('click', (e) => {
-    const btn = e.target.closest('.copy-btn');
-    if (!btn) return;
-    const pre = btn.closest('.code-block')?.querySelector('pre code');
-    if (!pre) return;
-    ui.copyCode(pre);
-  });
-
-  window.handleSend = handleSend;
-} catch (e) {
-  console.error('[DOMContentLoaded] Fatal error:', e);
-  if (elements && elements.chatForm) {
-    elements.chatForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      await handleSend();
+  if (elements.messagesArea) {
+    elements.messagesArea.addEventListener('click', (e) => {
+      const btn = e.target.closest('.copy-btn');
+      if (!btn) return;
+      const pre = btn.closest('.code-block')?.querySelector('pre code');
+      if (!pre) return;
+      ui.copyCode(pre);
     });
   }
-}});
+
+  /* ===== Restore Session, Tab, Draft ===== */
+  try {
+    const savedSessionId = historyManager.getActiveSessionId();
+    if (savedSessionId && historyManager.history.find(s => s.id === savedSessionId)) {
+      historyManager.loadSession(savedSessionId);
+    }
+  } catch (e) {
+    console.error('[Session] Gagal memulihkan sesi:', e);
+  }
+
+  try {
+    const savedTab = localStorage.getItem(TAB_MODE_KEY);
+    if (savedTab === 'image') {
+      setMode('image');
+    } else {
+      setMode('chat');
+    }
+  } catch (e) {
+    setMode('chat');
+  }
+
+  try {
+    const savedDraft = localStorage.getItem(DRAFT_KEY);
+    if (savedDraft) {
+      elements.messageInput.value = savedDraft;
+      ui.updateSendBtn(savedDraft.trim().length > 0);
+      autoResize(elements.messageInput);
+    }
+  } catch (e) {
+    // abaikan error kuota / mode privat
+  }
+
+  try {
+    const savedImageDraft = localStorage.getItem(IMAGE_DRAFT_KEY);
+    if (savedImageDraft) {
+      elements.imagePrompt.value = savedImageDraft;
+      elements.imageSendBtn.disabled = savedImageDraft.trim().length === 0;
+      autoResize(elements.imagePrompt);
+    }
+  } catch (e) {
+    // abaikan error kuota / mode privat
+  }
+
+  window.handleSend = handleSend;
+});
