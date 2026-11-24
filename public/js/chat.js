@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   let elements;
+  let handleSend;
   try {
     elements = {
     chatForm: document.getElementById('chatForm'),
@@ -24,6 +25,12 @@ document.addEventListener('DOMContentLoaded', () => {
     inputDock: document.querySelector('.input-dock'),
     scrollToBottomBtn: document.getElementById('scrollToBottomBtn'),
   };
+
+  /* ===== Chat Form Submit (early, so it always works) ===== */
+  elements.chatForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await handleSend();
+  });
 
   const ui = new ChatUI(elements);
   const modeChat = document.getElementById('modeChat');
@@ -429,11 +436,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ===== Chat Form Submit ===== */
 
-  elements.chatForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    await handleSend();
-  });
-
   /* ===== Image Generation ===== */
 
   elements.imageSendBtn.addEventListener('click', async () => {
@@ -482,7 +484,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ===== handleSend (Chat API) ===== */
 
-  async function handleSend() {
+  handleSend = async function() {
     const text = elements.messageInput.value.trim();
     if (!text) return;
 
@@ -543,7 +545,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     ui.hideTypingIndicator();
     ui.showError('Koneksi gagal. Periksa koneksi internet Anda.');
-  }
+  };
 
   /* ===== generateImage (Image API) ===== */
 
