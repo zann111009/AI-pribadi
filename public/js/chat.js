@@ -1,9 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
   let elements;
-  let handleSend;
   try {
     elements = {
-    chatForm: document.getElementById('chatForm'),
+      chatForm: document.getElementById('chatForm'),
     messageInput: document.getElementById('messageInput'),
     sendBtn: document.getElementById('sendBtn'),
     messagesArea: document.getElementById('messagesArea'),
@@ -484,7 +483,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ===== handleSend (Chat API) ===== */
 
-  handleSend = async function() {
+  async function handleSend() {
     const text = elements.messageInput.value.trim();
     if (!text) return;
 
