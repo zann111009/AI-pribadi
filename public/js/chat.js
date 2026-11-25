@@ -152,12 +152,16 @@ document.addEventListener('DOMContentLoaded', () => {
     modeImage.addEventListener('click', () => setMode('image'));
   }
 
-  // Initialize mode
-  setMode('chat');
-
   const menuToggle = document.getElementById('mobileMenuToggle');
   const appSidebar = document.getElementById('appSidebar');
   const headerOverlay = document.getElementById('headerOverlay');
+
+  // Initialize mode
+  try {
+    setMode('chat');
+  } catch (e) {
+    console.error('[setMode] Error:', e);
+  }
 
   function closeDrawer() {
     if (!menuToggle || !appSidebar || !headerOverlay) return;
