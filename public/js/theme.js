@@ -50,7 +50,7 @@ class ThemeManager {
     this.current = theme;
     document.documentElement.setAttribute('data-theme', theme);
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', theme === 'dark' ? '#0b1020' : '#f6f7fb');
+    if (meta) meta.setAttribute('content', theme === 'dark' ? '#0b0f1a' : '#f8fafc');
     this.sync();
   }
 
